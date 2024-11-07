@@ -25,6 +25,7 @@ func SendCaptcha(address string, captcha string) error {
 	rawMsg := fmt.Sprintf("To:%s\r\nFrom:%s<%s>\r\nSubject:%s\r\n%s\r\n\r\n%s", address, nickname, user, subject, contentType, body)
 	msg := []byte(rawMsg)
 	// 发送邮件
+	// TODO: 发送验证码要有间隔时间
 	from := user
 	addr := fmt.Sprintf("%s:%s", host, port)
 	err := smtp.SendMail(addr, auth, from, []string{address}, msg)

@@ -15,6 +15,7 @@ func main() {
 	e.Use(middleware.Recover())
 	config.InitConfig()
 	model.InitPostgres()
+	model.InitSuperAdmin()
 	router.InitRouter(e)
 
 	startURL := fmt.Sprint(config.Config.Server.Host, ":", config.Config.Server.Port)

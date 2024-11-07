@@ -7,6 +7,7 @@ import (
 )
 
 var Config configStruct
+var PathLevel map[string]map[string]int
 
 type configStruct struct {
 	Server   ServerConfig   `json:"server"`
@@ -14,6 +15,8 @@ type configStruct struct {
 	Redis    RedisConfig    `json:"redis"`
 	Jwt      JwtConfig      `json:"jwt"`
 	Email    EmailConfig    `json:"email"`
+	Captcha  CaptchaConfig  `json:"captcha"`
+	User     UserConfig     `json:"user"`
 }
 
 type ServerConfig struct {
@@ -45,11 +48,32 @@ type EmailConfig struct {
 }
 
 type CaptchaConfig struct {
-	Length int `json:"length"`
-	Expire int `json:"expire"`
+	Length  int `json:"length"`
+	Timeout int `json:"timeout"`
 }
 
+type UserConfig struct {
+	Nickname NicknameConfig `json:"nickname"`
+	Admin    AdminConfig    `json:"admin"`
+}
+
+type NicknameConfig struct {
+	RandMin int `json:"rand_min"`
+	RandMax int `json:"rand_max"`
+}
+
+type AdminConfig struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// InitConfig 初始化配置结构体
 func InitConfig() {
+	InitDefault()
+	InitPathLevel()
+}
+
+func InitDefault() {
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -62,6 +86,24 @@ func InitConfig() {
 		panic(err)
 	}
 	err = json.Unmarshal(ConfigFile, &Config)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func InitPathLevel() {
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	parts := strings.Split(dir, "BBingyan")
+	path := parts[0] + "BBingyan/Config/PathLevel.json"
+
+	ConfigFile, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal(ConfigFile, &PathLevel)
 	if err != nil {
 		panic(err)
 	}
