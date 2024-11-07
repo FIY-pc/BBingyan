@@ -1,0 +1,20 @@
+{
+  "/token": {
+    "GET": 0
+  },
+  "/users": {
+    "Get": 1,
+    "POST": 1,
+    "PUT": 1,
+    "DELETE": 1
+  },
+  "/users/register":{
+    "POST": 0
+  },
+  "/articles":{
+    "GET": 1,
+    "POST": 1,
+    "PUT": 1,
+    "DELETE": 1
+  }
+}
