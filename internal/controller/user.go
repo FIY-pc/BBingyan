@@ -19,7 +19,7 @@ func Login(c echo.Context) error {
 
 	if email == "" || password == "" || captcha == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "Email, password and captcha are required",
 			Error: "",
 		})
@@ -28,7 +28,7 @@ func Login(c echo.Context) error {
 	user, err := model.GetUserByEmail(email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "User not found",
 			Error: err.Error(),
 		})
@@ -37,7 +37,7 @@ func Login(c echo.Context) error {
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "Password is incorrect",
 			Error: err.Error(),
 		})
@@ -47,7 +47,7 @@ func Login(c echo.Context) error {
 	ok := util.AuthCaptcha(email, captcha)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "Captcha is incorrect",
 			Error: "",
 		})
@@ -69,7 +69,7 @@ func Login(c echo.Context) error {
 	}
 	// 返回成功响应
 	return c.JSON(http.StatusOK, params.Common200Resp{
-		Code: 200,
+		Code: http.StatusOK,
 		Msg:  "Login success",
 		Data: map[string]string{
 			"token":    token,
@@ -88,14 +88,14 @@ func GetCaptcha(c echo.Context) error {
 	err = util.AddCaptcha(email, captcha)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "Add captcha failed",
 			Error: err.Error(),
 		})
 	}
 	// 返回成功响应
 	return c.JSON(http.StatusOK, params.Common200Resp{
-		Code: 200,
+		Code: http.StatusOK,
 		Msg:  "Send captcha success",
 		Data: nil,
 	})
@@ -109,21 +109,21 @@ func Register(c echo.Context) error {
 
 	if email == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "Email is null",
 			Error: "",
 		})
 	}
 	if password == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "Password is null",
 			Error: "",
 		})
 	}
 	if captcha == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "Captcha is null",
 			Error: "",
 		})
@@ -132,7 +132,7 @@ func Register(c echo.Context) error {
 	_, err = model.GetUserByEmail(email)
 	if err == nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "Email already exists",
 			Error: "",
 		})
@@ -141,7 +141,7 @@ func Register(c echo.Context) error {
 	ok := util.AuthCaptcha(email, captcha)
 	if !ok {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  400,
+			Code:  http.StatusBadRequest,
 			Msg:   "Captcha is incorrect",
 			Error: "",
 		})
@@ -171,7 +171,7 @@ func Register(c echo.Context) error {
 	}
 	// 返回成功响应
 	return c.JSON(http.StatusOK, params.Common200Resp{
-		Code: 200,
+		Code: http.StatusOK,
 		Msg:  "Register success",
 		Data: map[string]string{
 			"email":    email,
