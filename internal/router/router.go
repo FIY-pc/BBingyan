@@ -14,6 +14,6 @@ func InitPublicRouter(e *echo.Echo) {
 		return c.String(200, "Hello, BBingyan!")
 	})
 	e.GET("/captcha", controller.GetCaptcha)
-	e.GET("/tokens", controller.Login)
+	e.POST("/tokens", controller.Login)
 	e.POST("/users/register", controller.Register)
 }
