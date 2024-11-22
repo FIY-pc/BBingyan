@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"strings"
+	"time"
 )
 
 var Config configStruct
@@ -48,8 +49,9 @@ type EmailConfig struct {
 }
 
 type CaptchaConfig struct {
-	Length  int `json:"length"`
-	Timeout int `json:"timeout"`
+	Length   int           `json:"length"`
+	Timeout  time.Duration `json:"timeout"`
+	Interval time.Duration `json:"interval"`
 }
 
 type UserConfig struct {

@@ -83,7 +83,14 @@ func GetCaptcha(c echo.Context) error {
 	email := c.FormValue("email")
 	// 发送验证码
 	captcha := util.GenerateCaptcha()
-	_ = util.SendCaptcha(email, captcha)
+	err = util.SendCaptcha(email, captcha)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "Sending captcha failed",
+			Error: err.Error(),
+		})
+	}
 	// 记录验证码
 	err = util.AddCaptcha(email, captcha)
 	if err != nil {
