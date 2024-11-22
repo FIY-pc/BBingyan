@@ -82,7 +82,7 @@ func CreateUser(user *User) error {
 
 func GetUserByEmail(email string) (*User, error) {
 	var user User
-	if err := postgresDb.Where("email =?", email).First(&user).Error; err != nil {
+	if err := postgresDb.Where("email", email).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -90,7 +90,7 @@ func GetUserByEmail(email string) (*User, error) {
 
 func GetUserByID(id uint) (*User, error) {
 	var user User
-	if err := postgresDb.Where("id =?", id).First(&user).Error; err != nil {
+	if err := postgresDb.Where("id", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -104,7 +104,14 @@ func UpdateUser(user *User) error {
 }
 
 func DeleteUserByID(id uint) error {
-	if err := postgresDb.Delete(&User{}, id).Error; err != nil {
+	if err := postgresDb.Where("id", id).Delete(&User{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteUserByEmail(email string) error {
+	if err := postgresDb.Where("email", email).Delete(&User{}).Error; err != nil {
 		return err
 	}
 	return nil
