@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"time"
 )
@@ -58,6 +59,42 @@ func InitArticle(db *gorm.DB) {
 	if err := db.AutoMigrate(&Comment{}); err != nil {
 		panic(err)
 	}
+}
+
+func CreateArticle(article Article) error {
+	if postgresDb == nil {
+		return errors.New("DB is nil")
+	}
+	postgresDb.Create(article)
+	return nil
+}
+
+func UpdateArticle(article Article) error {
+	if postgresDb == nil {
+		return errors.New("DB is nil")
+	}
+	postgresDb.Where("id", article.ID).Updates(article)
+	return nil
+}
+
+func GetArticleByID(id uint) (*Article, error) {
+	if postgresDb == nil {
+		return nil, errors.New("DB is nil")
+	}
+	resultArticle := Article{}
+	result := postgresDb.Where("id", id).First(&resultArticle)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &resultArticle, nil
+}
+
+func DeleteArticleByID(ID uint) error {
+	if postgresDb == nil {
+		return errors.New("DB is nil")
+	}
+	postgresDb.Where("id", ID).Delete(&Article{})
+	return nil
 }
 
 func comment() {
