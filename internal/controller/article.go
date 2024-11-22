@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/FIY-pc/BBingyan/internal/controller/params"
 	"github.com/FIY-pc/BBingyan/internal/model"
+	"github.com/FIY-pc/BBingyan/internal/util"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
@@ -27,15 +28,20 @@ func ArticleInfo(c echo.Context) error {
 }
 
 func ArticleCreate(c echo.Context) error {
+	var err error
 	article := model.Article{}
-	err := c.Bind(&article)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Parse article failed",
-			Error: err.Error(),
-		})
+	// 进行信息更换
+	if title := c.FormValue("title"); title != "" {
+		article.Title = title
 	}
+	if content := c.FormValue("content"); content != "" {
+		article.Content.Text = content
+	}
+	// 绑定作者ID
+	claims := c.Get("claims").(util.JwtClaims)
+	userId := claims.UserId
+	article.UserID = userId
+
 	err = model.CreateArticle(article)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
@@ -68,6 +74,29 @@ func ArticleUpdate(c echo.Context) error {
 			Error: err.Error(),
 		})
 	}
+
+	claims := c.Get("claims").(util.JwtClaims)
+	userId := claims.UserId
+	Permission := claims.Permission
+	// 查询权限，若为管理员以下，则检查是否为文章作者
+	if Permission < model.PermissionAdmin {
+		article, err := model.GetArticleByID(uint(id))
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+				Code:  http.StatusInternalServerError,
+				Msg:   "Get article failed",
+				Error: err.Error(),
+			})
+		}
+		if article.UserID != userId {
+			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
+				Code:  http.StatusUnauthorized,
+				Msg:   "Unauthorized",
+				Error: "",
+			})
+		}
+	}
+
 	if title := c.QueryParam("title"); title != "" {
 		article.Title = title
 	}
@@ -98,6 +127,28 @@ func ArticleDelete(c echo.Context) error {
 			Error: err.Error(),
 		})
 	}
+	claims := c.Get("claims").(util.JwtClaims)
+	userId := claims.UserId
+	Permission := claims.Permission
+	// 查询权限，若为管理员以下，则检查是否为文章作者
+	if Permission < model.PermissionAdmin {
+		article, err := model.GetArticleByID(uint(id))
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+				Code:  http.StatusInternalServerError,
+				Msg:   "Get article failed",
+				Error: err.Error(),
+			})
+		}
+		if article.UserID != userId {
+			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
+				Code:  http.StatusUnauthorized,
+				Msg:   "Unauthorized",
+				Error: "",
+			})
+		}
+	}
+
 	err = model.DeleteArticleByID(uint(id))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
