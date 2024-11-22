@@ -54,7 +54,7 @@ func Login(c echo.Context) error {
 	}
 	// 生成token
 	claims := util.JwtClaims{
-		ID:         user.ID,
+		UserId:     user.ID,
 		Email:      user.Email,
 		Permission: user.Permission,
 		Exp:        time.Now().Add(time.Minute * time.Duration(config.Config.Jwt.Expire)).Unix(),
@@ -184,5 +184,77 @@ func Register(c echo.Context) error {
 			"email":    email,
 			"nickname": user.Nickname,
 		},
+	})
+}
+
+func UserInfo(c echo.Context) error {
+	email := c.FormValue("email")
+	user := &model.User{}
+	user, err := model.GetUserByEmail(email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Get user failed",
+			Error: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "User info success",
+		Data: user,
+	})
+}
+
+func UserUpdate(c echo.Context) error {
+	email := c.FormValue("email")
+	user, err := model.GetUserByEmail(email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Get user failed",
+			Error: err.Error(),
+		})
+	}
+
+	// 以下为比较适合在本路径更新的条目
+	if Intro := c.FormValue("intro"); Intro != "" {
+		user.UserInfo.Intro = Intro
+	}
+	if Password := c.FormValue("password"); Password != "" {
+		user.Password = Password
+	}
+	if Nickname := c.FormValue("nickname"); Nickname != "" {
+		user.Nickname = Nickname
+	}
+
+	err = model.UpdateUser(user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Update user failed",
+			Error: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "User update success",
+		Data: user,
+	})
+}
+
+func UserDelete(c echo.Context) error {
+	email := c.FormValue("email")
+	err := model.DeleteUserByEmail(email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Delete user failed",
+			Error: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "User delete success",
+		Data: nil,
 	})
 }
