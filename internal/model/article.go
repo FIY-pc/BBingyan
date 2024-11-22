@@ -59,3 +59,11 @@ func InitArticle(db *gorm.DB) {
 		panic(err)
 	}
 }
+
+func comment() {
+
+}
+
+func like() {
+
+}

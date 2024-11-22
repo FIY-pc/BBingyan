@@ -4,12 +4,12 @@
     "port": "10111"
   },
   "postgres":{
-    "dsn": ""
+    "dsn": "host=localhost port=5432 dbname=bbingyan user=postgres password=123456"
   },
   "redis":
   {
-    "addr": "",
-    "password": "",
+    "addr": "redis-11341.c321.us-east-1-2.ec2.redns.redis-cloud.com:11341",
+    "password": "Tkslme2rwPEKCa0WxrWo12liO0snjduv",
     "db": 0
   },
   "jwt": {
@@ -18,15 +18,16 @@
   },
   "email":
   {
-    "smtp_user": "",
-    "smtp_password": "",
-    "smtp_nickname": "",
+    "smtp_user": "2953997758@qq.com",
+    "smtp_password": "nipiibmcdxlkdfbc",
+    "smtp_nickname": "zhao",
     "smtp_host": "smtp.qq.com",
     "smtp_port": "587"
   },
   "captcha":{
     "length": 6,
-    "timeout": 300
+    "timeout": 300,
+    "interval": 60
   },
   "user":{
     "admin": {

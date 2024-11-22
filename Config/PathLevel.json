@@ -8,6 +8,9 @@
     "PUT": 1,
     "DELETE": 1
   },
+  "/captcha": {
+    "GET": 0
+  },
   "/users/register":{
     "POST": 0
   },
