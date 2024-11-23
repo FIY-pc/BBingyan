@@ -9,6 +9,7 @@ import (
 	"strconv"
 )
 
+// Follow 关注
 func Follow(c echo.Context) error {
 	rdb := util.Rdb
 	ctx := context.Background()
@@ -16,7 +17,7 @@ func Follow(c echo.Context) error {
 	// 关注者id
 	userId := claims.UserId
 	// 被关注者id
-	targetId := c.QueryParam("id")
+	targetId := c.QueryParam("userId")
 	if targetId == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
@@ -25,7 +26,7 @@ func Follow(c echo.Context) error {
 		})
 	}
 
-	// 将关注者id添加到被关注者id的follow set中
+	// 检查是否已关注
 	cmd := rdb.SIsMember(ctx, targetId, userId)
 	isMember, err := cmd.Result()
 	if err != nil {
@@ -42,6 +43,7 @@ func Follow(c echo.Context) error {
 			Error: "",
 		})
 	}
+	// 将关注者id添加到被关注者id的follow set中
 	addcmd := rdb.SAdd(ctx, params.FollowKey(targetId), userId)
 	if addcmd.Err() != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
@@ -57,12 +59,15 @@ func Follow(c echo.Context) error {
 	})
 }
 
+// Unfollow 取消关注
 func Unfollow(c echo.Context) error {
 	rdb := util.Rdb
 	ctx := context.Background()
+	// 从claims中获取关注者id
 	claims := c.Get("claims").(util.JwtClaims)
 	userId := claims.UserId
-	targetId := c.QueryParam("id")
+	// 被关注者id
+	targetId := c.QueryParam("userId")
 	if targetId == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
@@ -70,6 +75,7 @@ func Unfollow(c echo.Context) error {
 			Error: "",
 		})
 	}
+	// 检查是否已关注
 	cmd := rdb.SIsMember(ctx, targetId, userId)
 	isMember, err := cmd.Result()
 	if err != nil {
@@ -86,7 +92,7 @@ func Unfollow(c echo.Context) error {
 			Error: "",
 		})
 	}
-
+	// 取消关注
 	remcmd := rdb.SRem(ctx, params.FollowKey(targetId), userId)
 	if remcmd.Err() != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
@@ -102,12 +108,15 @@ func Unfollow(c echo.Context) error {
 	})
 }
 
+// IsFollowed 检查用户自身是否关注了目标用户
 func IsFollowed(c echo.Context) error {
 	rdb := util.Rdb
 	ctx := context.Background()
+	// 从claims中获取关注者id
 	claims := c.Get("claims").(util.JwtClaims)
 	userId := claims.UserId
-	targetId := c.QueryParam("id")
+	// 被关注者id
+	targetId := c.QueryParam("userId")
 	if targetId == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
@@ -115,6 +124,7 @@ func IsFollowed(c echo.Context) error {
 			Error: "",
 		})
 	}
+	// 判断是否关注目标用户
 	cmd := rdb.SIsMember(ctx, targetId, userId)
 	isMember, err := cmd.Result()
 	if err != nil {
@@ -124,6 +134,7 @@ func IsFollowed(c echo.Context) error {
 			Error: err.Error(),
 		})
 	}
+	// 返回关注状态
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
 		Msg:  "Followed",
@@ -133,12 +144,15 @@ func IsFollowed(c echo.Context) error {
 	})
 }
 
+// MyFollowerNum 仅通过token信息获取用户自身的追随者数量
 func MyFollowerNum(c echo.Context) error {
 	rdb := util.Rdb
 	ctx := context.Background()
+	// 从claims中获取自身id
 	claims := c.Get("claims").(util.JwtClaims)
 	userId := claims.UserId
 	idStr := strconv.Itoa(int(userId))
+	// 统计数量
 	cmd := rdb.SCard(ctx, params.FollowKey(idStr))
 	if cmd.Err() != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
@@ -155,6 +169,7 @@ func MyFollowerNum(c echo.Context) error {
 			Error: err.Error(),
 		})
 	}
+	// 返回结果
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
 		Msg:  "Get follower num success",
@@ -164,10 +179,13 @@ func MyFollowerNum(c echo.Context) error {
 	})
 }
 
+// GetFollowerNum 获取任何人的追随者数量,需要目标id
 func GetFollowerNum(c echo.Context) error {
 	rdb := util.Rdb
 	ctx := context.Background()
-	userId := c.QueryParam("id")
+	// 获取查询目标id
+	userId := c.QueryParam("userId")
+	// 查询数量
 	cmd := rdb.SCard(ctx, params.FollowKey(userId))
 	if cmd.Err() != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
@@ -184,6 +202,7 @@ func GetFollowerNum(c echo.Context) error {
 			Error: err.Error(),
 		})
 	}
+	// 返回结果
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
 		Msg:  "Get follower num success",
