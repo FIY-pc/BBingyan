@@ -19,5 +19,18 @@
     "POST": 1,
     "PUT": 1,
     "DELETE": 1
+  },
+  "/follows":{
+    "POST": 1,
+    "DELETE": 1
+  },
+  "/follows/mynum": {
+    "GET": 1
+  },
+  "/follows/num":{
+    "GET": 1
+  },
+  "/follows/isfollow":{
+    "GET": 1
   }
 }
