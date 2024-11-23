@@ -27,11 +27,11 @@ func InitPublicRouter(e *echo.Echo) {
 	e.DELETE("/users", controller.UserDelete)
 
 	// follow
-	e.POST("/follow", controller.Follow)
-	e.DELETE("/follow", controller.Unfollow)
-	e.GET("/follow/mynum", controller.MyFollowerNum)
-	e.GET("/follow/num", controller.GetFollowerNum)
-	e.GET("/follow/isfollow", controller.IsFollowed)
+	e.POST("/follows", controller.Follow)
+	e.DELETE("/follows", controller.Unfollow)
+	e.GET("/follows/mynum", controller.MyFollowerNum)
+	e.GET("/follows/num", controller.GetFollowerNum)
+	e.GET("/follows/isfollow", controller.IsFollowed)
 
 	// Article
 	e.GET("/articles", controller.ArticleInfo)
