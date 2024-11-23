@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func follow(c echo.Context) error {
+func Follow(c echo.Context) error {
 	rdb := util.Rdb
 	ctx := context.Background()
 	claims := c.Get("claims").(util.JwtClaims)
@@ -102,7 +102,7 @@ func Unfollow(c echo.Context) error {
 	})
 }
 
-func isFollowed(c echo.Context) error {
+func IsFollowed(c echo.Context) error {
 	rdb := util.Rdb
 	ctx := context.Background()
 	claims := c.Get("claims").(util.JwtClaims)
