@@ -26,6 +26,13 @@ func InitPublicRouter(e *echo.Echo) {
 	e.PUT("/users", controller.UserUpdate)
 	e.DELETE("/users", controller.UserDelete)
 
+	// follow
+	e.POST("/follow", controller.Follow)
+	e.DELETE("/follow", controller.Unfollow)
+	e.GET("/follow/mynum", controller.MyFollowerNum)
+	e.GET("/follow/num", controller.GetFollowerNum)
+	e.GET("/follow/isfollow", controller.IsFollowed)
+
 	// Article
 	e.GET("/articles", controller.ArticleInfo)
 	e.POST("/articles", controller.ArticleCreate)
