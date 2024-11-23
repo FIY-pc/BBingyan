@@ -15,15 +15,10 @@ import (
 // AuthCaptcha 验证验证码是否正确
 func AuthCaptcha(email string, captcha string) bool {
 	var result bool
-	ctx := context.Background()
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     config.Config.Redis.Addr,
-		Password: config.Config.Redis.Password,
-		DB:       config.Config.Redis.DB,
-	})
 	// 检查验证码是否正确
+	ctx := context.Background()
 	key := "captcha:" + email + ":" + captcha
-	val, err := rdb.Get(ctx, key).Result()
+	val, err := Rdb.Get(ctx, key).Result()
 	if errors.Is(err, redis.Nil) {
 		result = false
 	} else if err != nil {
@@ -31,29 +26,17 @@ func AuthCaptcha(email string, captcha string) bool {
 	} else {
 		result = val == captcha
 	}
-	err = rdb.Close()
-	if err != nil {
-		result = false
-	}
 	return result
 }
 
 // AddCaptcha 记录验证码
 func AddCaptcha(email string, captcha string) error {
 	ctx := context.Background()
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     config.Config.Redis.Addr,
-		Password: config.Config.Redis.Password,
-		DB:       config.Config.Redis.DB,
-	})
 	// 记录验证码，设置验证码过期时间
 	key := Param.CaptchaKey(email)
-	result := rdb.Set(ctx, key, captcha, time.Second*time.Duration(config.Config.Captcha.Timeout))
+	result := Rdb.Set(ctx, key, captcha, time.Second*time.Duration(config.Config.Captcha.Timeout))
 	if result.Err() != nil {
 		return result.Err()
-	}
-	if err := rdb.Close(); err != nil {
-		return err
 	}
 	return nil
 }
@@ -100,19 +83,14 @@ func GenerateCaptcha() string {
 // CaptchaInterval 检查验证码发送间隔是否冷却
 func CaptchaInterval(email string) bool {
 	ctx := context.Background()
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     config.Config.Redis.Addr,
-		Password: config.Config.Redis.Password,
-		DB:       config.Config.Redis.DB,
-	})
 	key := Param.CaptchaKey(email)
 	// 如果redis中没有验证码条目，通过
-	_, err := rdb.Get(ctx, key).Result()
+	_, err := Rdb.Get(ctx, key).Result()
 	if errors.Is(err, redis.Nil) {
 		return true
 	}
 	// 查询过期时间
-	ttl, err := rdb.TTL(ctx, key).Result()
+	ttl, err := Rdb.TTL(ctx, key).Result()
 	if err != nil {
 		return false
 	}
