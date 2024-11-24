@@ -144,70 +144,63 @@ func IsFollowed(c echo.Context) error {
 	})
 }
 
-// MyFollowerNum 仅通过token信息获取用户自身的追随者数量
-func MyFollowerNum(c echo.Context) error {
-	rdb := util.Rdb
-	ctx := context.Background()
-	// 从claims中获取自身id
-	claims := c.Get("claims").(util.JwtClaims)
-	userId := claims.UserId
-	idStr := strconv.Itoa(int(userId))
-	// 统计数量
-	cmd := rdb.SCard(ctx, params.FollowKey(idStr))
-	if cmd.Err() != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "judge isFollowed failed",
-			Error: cmd.Err().Error(),
-		})
-	}
-	num, err := cmd.Result()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "judge isFollowed failed",
-			Error: err.Error(),
-		})
-	}
-	// 返回结果
-	return c.JSON(http.StatusOK, params.Common200Resp{
-		Code: http.StatusOK,
-		Msg:  "Get follower num success",
-		Data: map[string]interface{}{
-			"num": num,
-		},
-	})
-}
-
-// GetFollowerNum 获取任何人的追随者数量,需要目标id
+// GetFollowerNum 若提供目标用户id,则获取该id用户的追随者数量,若未提供,则根据token获取自己的追随者数量
 func GetFollowerNum(c echo.Context) error {
+	var num int64
+	var err error
+	var resultId string
 	rdb := util.Rdb
 	ctx := context.Background()
 	// 获取查询目标id
-	userId := c.QueryParam("userId")
+	if userId := c.QueryParam("userId"); userId != "" {
+		cmd := rdb.SCard(ctx, params.FollowKey(userId))
+		if cmd.Err() != nil {
+			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+				Code:  http.StatusInternalServerError,
+				Msg:   "Get follower num failed",
+				Error: cmd.Err().Error(),
+			})
+		}
+		num, err = cmd.Result()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+				Code:  http.StatusInternalServerError,
+				Msg:   "Get follower num failed",
+				Error: err.Error(),
+			})
+		}
+		resultId = userId
+	} else {
+		// 从claims获取用户id
+		claims := c.Get("claims").(util.JwtClaims)
+		rawMyId := claims.UserId
+		myId := strconv.Itoa(int(rawMyId))
+		cmd := rdb.SCard(ctx, params.FollowKey(myId))
+		if cmd.Err() != nil {
+			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+				Code:  http.StatusInternalServerError,
+				Msg:   "Get follower num failed",
+				Error: cmd.Err().Error(),
+			})
+		}
+		num, err = cmd.Result()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+				Code:  http.StatusInternalServerError,
+				Msg:   "Get follower num failed",
+				Error: err.Error(),
+			})
+		}
+		resultId = myId
+	}
 	// 查询数量
-	cmd := rdb.SCard(ctx, params.FollowKey(userId))
-	if cmd.Err() != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get follower num failed",
-			Error: cmd.Err().Error(),
-		})
-	}
-	num, err := cmd.Result()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get follower num failed",
-			Error: err.Error(),
-		})
-	}
+
 	// 返回结果
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
 		Msg:  "Get follower num success",
 		Data: map[string]interface{}{
-			"userid": userId,
+			"userid": resultId,
 			"num":    num,
 		},
 	})
