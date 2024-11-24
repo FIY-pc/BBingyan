@@ -117,6 +117,32 @@ func CommentDelete(c echo.Context) error {
 	})
 }
 
+// CommentGetById 使用id查询单条评论
+func CommentGetById(c echo.Context) error {
+	rawCommentId := c.QueryParam("id")
+	commentId, err := strconv.Atoi(rawCommentId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "Invalid commentID",
+			Error: "",
+		})
+	}
+	comment, err := model.GetCommentByID(uint(commentId))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "Comment does not exist",
+			Error: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "Get comment successfully",
+		Data: comment,
+	})
+}
+
 // CommentList 获取文章评论,进行分页处理,关键参数:page,pageSize,articleId
 func CommentList(c echo.Context) error {
 	// 非空检查

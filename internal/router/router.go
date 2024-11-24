@@ -37,5 +37,6 @@ func InitRouter(e *echo.Echo) {
 	// comment
 	e.POST("/comments", controller.CommentCreate)
 	e.DELETE("/comments", controller.CommentDelete)
+	e.GET("/comments", controller.CommentGetById)
 	e.GET("/comments/pages", controller.CommentList)
 }
