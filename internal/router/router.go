@@ -7,10 +7,6 @@ import (
 )
 
 func InitRouter(e *echo.Echo) {
-	InitPublicRouter(e)
-}
-
-func InitPublicRouter(e *echo.Echo) {
 	e.Use(util.JWTAuthMiddleware())
 	e.GET("/", func(c echo.Context) error {
 		return c.String(200, "Hello, BBingyan!")
