@@ -26,6 +26,15 @@
   "/article/commentsCount": {
     "GET": 1
   },
+  "/articles/like": {
+    "POST": 1
+  },
+  "/articles/unlike": {
+    "DELETE": 1
+  },
+  "/articles/likeNum": {
+    "GET": 1
+  },
   "/follows":{
     "POST": 1,
     "DELETE": 1

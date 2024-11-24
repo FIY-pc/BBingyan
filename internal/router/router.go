@@ -35,6 +35,10 @@ func InitRouter(e *echo.Echo) {
 	e.PUT("/articles", controller.ArticleUpdate)
 	e.DELETE("/articles", controller.ArticleDelete)
 	e.GET("/article/commentsCount", controller.GetArticleCommentCount)
+	// like
+	e.POST("/articles/like", controller.Like)
+	e.DELETE("/articles/unlike", controller.Unlike)
+	e.GET("/articles/likeNum", controller.GetLikeNum)
 
 	// comment
 	e.POST("/comments", controller.CommentCreate)
