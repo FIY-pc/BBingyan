@@ -55,7 +55,6 @@ func Login(c echo.Context) error {
 	// 生成token
 	claims := util.JwtClaims{
 		UserId:     user.ID,
-		Email:      user.Email,
 		Permission: user.Permission,
 		Exp:        time.Now().Add(time.Minute * time.Duration(config.Config.Jwt.Expire)).Unix(),
 	}

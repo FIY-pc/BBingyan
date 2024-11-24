@@ -21,6 +21,7 @@ func InitRouter(e *echo.Echo) {
 	e.POST("/users/login", controller.Login)
 	e.PUT("/users", controller.UserUpdate)
 	e.DELETE("/users", controller.UserDelete)
+	e.GET("/users/commentCount", controller.GetUserCommentCount)
 
 	// follow
 	e.POST("/follows", controller.Follow)
@@ -33,10 +34,12 @@ func InitRouter(e *echo.Echo) {
 	e.POST("/articles", controller.ArticleCreate)
 	e.PUT("/articles", controller.ArticleUpdate)
 	e.DELETE("/articles", controller.ArticleDelete)
+	e.GET("/article/commentsCount", controller.GetArticleCommentCount)
 
 	// comment
 	e.POST("/comments", controller.CommentCreate)
 	e.DELETE("/comments", controller.CommentDelete)
 	e.GET("/comments", controller.CommentGetById)
 	e.GET("/comments/pages", controller.CommentList)
+
 }
