@@ -34,6 +34,7 @@
     "GET": 1
   },
   "/comments":{
+    "GET": 1,
     "POST": 1,
     "DELETE": 1
   },
