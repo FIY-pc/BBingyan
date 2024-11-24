@@ -117,7 +117,84 @@ func CommentDelete(c echo.Context) error {
 	})
 }
 
-// CommentList 获取文章所有评论
+// CommentList 获取文章评论,进行分页处理,关键参数:page,pageSize,articleId
 func CommentList(c echo.Context) error {
-	return c.JSON(http.StatusNotImplemented, "Not implemented")
+	// 非空检查
+	rawArticleId := c.QueryParam("articleId")
+	rawPage := c.QueryParam("page")
+	rawPageSize := c.QueryParam("pageSize")
+	if rawPage != "" {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "The page param missing",
+			Error: "",
+		})
+	}
+	if rawPageSize != "" {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "The pageSize param missing",
+			Error: "",
+		})
+	}
+	if rawArticleId != "" {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "The articleId param missing",
+			Error: "",
+		})
+	}
+	// 转换类型
+	articleId, err := strconv.Atoi(rawArticleId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "Invalid articleId",
+			Error: "",
+		})
+	}
+	page, err := strconv.Atoi(rawPage)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "Invalid page",
+			Error: "",
+		})
+	}
+	pageSize, err := strconv.Atoi(rawPageSize)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "Invalid pageSize",
+			Error: "",
+		})
+	}
+	// 获取当前页数的评论
+	list, err := model.GetCommentByPage(uint(articleId), page, pageSize)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Get comment failed",
+			Error: err.Error(),
+		})
+	}
+	// 获取总评论数
+	count, err := model.GetCommentNum(uint(articleId))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Get comment count failed",
+			Error: err.Error(),
+		})
+	}
+	// 返回结果
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"Code":  http.StatusOK,
+		"Msg":   "Get comment successfully",
+		"Count": count,
+		"Data": map[string]interface{}{
+			"articleId":   articleId,
+			"commentList": list,
+		},
+	})
 }

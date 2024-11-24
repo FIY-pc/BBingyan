@@ -36,5 +36,8 @@
   "/comments":{
     "POST": 1,
     "DELETE": 1
+  },
+  "/comments/pages":{
+    "GET": 1
   }
 }

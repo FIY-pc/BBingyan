@@ -37,3 +37,21 @@ func DeleteCommentByID(id uint) error {
 	postgresDb.Where("id", id).Delete(&Comment{})
 	return nil
 }
+
+func GetCommentByPage(articleId uint, page int, pageSize int) ([]Comment, error) {
+	if postgresDb == nil {
+		return nil, errors.New("DB is nil")
+	}
+	var comments []Comment
+	postgresDb.Where("article_id", articleId).Offset((page - 1) * pageSize).Limit(pageSize).Find(&comments)
+	return comments, nil
+}
+
+func GetCommentNum(articleId uint) (int64, error) {
+	if postgresDb == nil {
+		return 0, errors.New("DB is nil")
+	}
+	var commentNum int64
+	postgresDb.Where("article_id", articleId).Count(&commentNum)
+	return commentNum, nil
+}
