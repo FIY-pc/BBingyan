@@ -29,7 +29,6 @@ func InitPublicRouter(e *echo.Echo) {
 	// follow
 	e.POST("/follows", controller.Follow)
 	e.DELETE("/follows", controller.Unfollow)
-	e.GET("/follows/mynum", controller.MyFollowerNum)
 	e.GET("/follows/num", controller.GetFollowerNum)
 	e.GET("/follows/isfollow", controller.IsFollowed)
 
