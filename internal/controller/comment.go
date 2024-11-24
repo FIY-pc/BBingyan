@@ -204,8 +204,8 @@ func CommentList(c echo.Context) error {
 			Error: err.Error(),
 		})
 	}
-	// 获取总评论数
-	count, err := model.GetCommentNum(uint(articleId))
+	// 获取当前文章总评论数
+	count, err := model.GetArticleCommentCount(uint(articleId))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
 			Code:  http.StatusInternalServerError,
@@ -221,6 +221,79 @@ func CommentList(c echo.Context) error {
 		"Data": map[string]interface{}{
 			"articleId":   articleId,
 			"commentList": list,
+		},
+	})
+}
+
+func GetArticleCommentCount(c echo.Context) error {
+	rawArticleId := c.QueryParam("articleId")
+	articleId, err := strconv.Atoi(rawArticleId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "Invalid articleId",
+			Error: "",
+		})
+	}
+	count, err := model.GetArticleCommentCount(uint(articleId))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Get comment count failed",
+			Error: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "Get comment count successfully",
+		Data: map[string]interface{}{
+			"articleId": articleId,
+			"Count":     count,
+		},
+	})
+}
+
+func GetUserCommentCount(c echo.Context) error {
+	var commentNum int64
+	var err error
+	rawUserId := c.QueryParam("userId")
+	// 若提供userId,则查询该用户,否则查询自身评论数
+	if rawUserId == "" {
+		claims := c.Get("claims").(util.JwtClaims)
+		userId := claims.UserId
+		commentNum, err = model.GetUserCommentCount(userId)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+				Code:  http.StatusInternalServerError,
+				Msg:   "Get comment count failed",
+				Error: err.Error(),
+			})
+		}
+	} else {
+		var userId int
+		userId, err = strconv.Atoi(rawUserId)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+				Code:  http.StatusBadRequest,
+				Msg:   "Invalid userId",
+				Error: "",
+			})
+		}
+		commentNum, err = model.GetUserCommentCount(uint(userId))
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+				Code:  http.StatusInternalServerError,
+				Msg:   "Get comment count failed",
+				Error: err.Error(),
+			})
+		}
+	}
+	// 返回结果
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "Get comment count successfully",
+		Data: map[string]interface{}{
+			"commentNum": commentNum,
 		},
 	})
 }
