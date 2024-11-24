@@ -10,10 +10,9 @@ import (
 
 // JwtClaims 是一个结构体，用于存储JWT令牌的声明信息。
 type JwtClaims struct {
-	ID         uint   `json:"id"`
-	Email      string `json:"email"`
-	Permission int    `json:"permission"`
-	Exp        int64  `json:"exp"`
+	UserId     uint  `json:"userId"`
+	Permission int   `json:"permission"`
+	Exp        int64 `json:"exp"`
 }
 
 // Valid 方法用于验证 JwtClaims 结构体中的 token 是否有效。
