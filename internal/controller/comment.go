@@ -24,8 +24,9 @@ func CommentCreate(c echo.Context) error {
 	// 获取claims,读取用户id
 	claims := c.Get("claims").(util.JwtClaims)
 	userId := claims.UserId
-	// 调用model
+	// 获取内容
 	content := c.FormValue("content")
+	// 调用model
 	comment := model.Comment{
 		UserID:    userId,
 		ArticleID: uint(articleId),

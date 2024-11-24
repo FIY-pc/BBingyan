@@ -32,5 +32,9 @@
   },
   "/follows/isfollow":{
     "GET": 1
+  },
+  "/comments":{
+    "POST": 1,
+    "DELETE": 1
   }
 }

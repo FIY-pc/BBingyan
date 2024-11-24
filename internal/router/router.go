@@ -37,4 +37,8 @@ func InitPublicRouter(e *echo.Echo) {
 	e.POST("/articles", controller.ArticleCreate)
 	e.PUT("/articles", controller.ArticleUpdate)
 	e.DELETE("/articles", controller.ArticleDelete)
+
+	// comment
+	e.POST("/comments", controller.CommentCreate)
+	e.DELETE("/comments", controller.CommentDelete)
 }
