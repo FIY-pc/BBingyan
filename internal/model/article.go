@@ -15,7 +15,7 @@ type Article struct {
 	Title      string    `json:"title"`       // 文章标题
 	CommentNum uint      `json:"comment_num"` // 文章评论数
 
-	Comment []Comment `json:"comment" gorm:"foreignKey:ArticleID"` // has many
+	Comment []Comment `json:"comment" gorm:"-"`                    // forbid preload
 	Content Content   `json:"content" gorm:"foreignKey:ArticleID"` // has one
 }
 

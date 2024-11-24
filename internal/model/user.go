@@ -22,31 +22,13 @@ type User struct {
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updatedAt"`
 
-	UserInfo UserInfo  `json:"user_info"`                          //has one
-	Article  []Article `json:"article"`                            //has many
-	Follower []User    `json:"follower" gorm:"many2many:follows;"` //many to many
-}
-
-type UserInfo struct {
-	ID        uint      `json:"id" gorm:"primaryKey"`
-	UpdatedAt time.Time `json:"updated_at"`
-	UserID    uint      `json:"user_id"`
-	Intro     string    `json:"intro"`
-	Avatar    string    `json:"avatar"`
-}
-
-type UserFollower struct {
-	ID         uint      `json:"id" gorm:"primaryKey"`
-	CreatedAt  time.Time `json:"created_at"`
-	UserID     uint      `json:"user_id"`
-	FollowerID uint      `json:"follower_id"`
+	Intro   string    `json:"intro"`
+	Avatar  string    `json:"avatar"`
+	Article []Article `json:"article" gorm:"-"` // forbid preload
 }
 
 func InitUser(db *gorm.DB) {
-	if err := db.AutoMigrate(&User{}, &UserFollower{}); err != nil {
-		panic(err)
-	}
-	if err := db.AutoMigrate(&UserInfo{}); err != nil {
+	if err := db.AutoMigrate(&User{}); err != nil {
 		panic(err)
 	}
 }
