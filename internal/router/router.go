@@ -45,4 +45,11 @@ func InitRouter(e *echo.Echo) {
 	e.DELETE("/comments", controller.CommentDelete)
 	e.GET("/comments", controller.CommentGetById)
 	e.GET("/comments/pages", controller.CommentList)
+
+	// node
+	e.GET("/nodes", controller.NodeInfo)
+	e.POST("/nodes", controller.CreateNode)
+	e.DELETE("/nodes", controller.DeleteNode)
+	e.PUT("/nodes", controller.UpdateNode)
+	e.GET("/nodes/articles", controller.ListArticleFromNode)
 }
