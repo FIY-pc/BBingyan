@@ -1,59 +1,59 @@
 {
   "/token": {
-    "GET": 0
+    "GET": "public"
   },
   "/users": {
-    "Get": 1,
-    "POST": 1,
-    "PUT": 1,
-    "DELETE": 1
+    "Get": "user",
+    "POST": "user",
+    "PUT": "user",
+    "DELETE": "user"
   },
   "/users/commentCount": {
-    "GET": 1
+    "GET": "user"
   },
   "/captcha": {
-    "GET": 0
+    "GET": "public"
   },
   "/users/register":{
-    "POST": 0
+    "POST": "public"
   },
   "/articles":{
-    "GET": 1,
-    "POST": 1,
-    "PUT": 1,
-    "DELETE": 1
+    "GET": "user",
+    "POST": "user",
+    "PUT": "user",
+    "DELETE": "user"
   },
   "/article/commentsCount": {
-    "GET": 1
+    "GET": "user"
   },
   "/articles/like": {
-    "POST": 1
+    "POST": "user"
   },
   "/articles/unlike": {
-    "DELETE": 1
+    "DELETE": "user"
   },
   "/articles/likeNum": {
-    "GET": 1
+    "GET": "user"
   },
   "/follows":{
-    "POST": 1,
-    "DELETE": 1
+    "POST": "user",
+    "DELETE": "user"
   },
   "/follows/mynum": {
-    "GET": 1
+    "GET": "user"
   },
   "/follows/num":{
-    "GET": 1
+    "GET": "user"
   },
   "/follows/isfollow":{
-    "GET": 1
+    "GET": "user"
   },
   "/comments":{
-    "GET": 1,
-    "POST": 1,
-    "DELETE": 1
+    "GET": "user",
+    "POST": "user",
+    "DELETE": "user"
   },
   "/comments/pages":{
-    "GET": 1
+    "GET": "user"
   }
 }

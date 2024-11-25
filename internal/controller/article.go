@@ -79,7 +79,7 @@ func ArticleUpdate(c echo.Context) error {
 	userId := claims.UserId
 	Permission := claims.Permission
 	// 查询权限，若为管理员以下，则检查是否为文章作者
-	if Permission < model.PermissionAdmin {
+	if Permission < util.PermissionAdmin {
 		article, err := model.GetArticleByID(uint(id))
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
@@ -131,7 +131,7 @@ func ArticleDelete(c echo.Context) error {
 	userId := claims.UserId
 	Permission := claims.Permission
 	// 查询权限，若为管理员以下，则检查是否为文章作者
-	if Permission < model.PermissionAdmin {
+	if Permission < util.PermissionAdmin {
 		article, err := model.GetArticleByID(uint(id))
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{

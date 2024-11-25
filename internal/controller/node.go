@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	nodeIDIsEmpty   = -1
-	nodeIDIsInvalid = -2
+	nodeIDIsEmpty   = 0
+	nodeIDIsInvalid = 1
 )
 
 // NodeInfo 获取节点基本信息,可以使用ID或Name进行查询

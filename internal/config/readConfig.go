@@ -8,7 +8,7 @@ import (
 )
 
 var Config configStruct
-var PathLevel map[string]map[string]int
+var PathLevel map[string]map[string]string
 
 type configStruct struct {
 	Server   ServerConfig   `json:"server"`

@@ -81,7 +81,7 @@ func CommentDelete(c echo.Context) error {
 	userId := claims.UserId
 	permission := claims.Permission
 	// 用户权限仅能删自己的评论
-	if permission == model.PermissionUser {
+	if permission == util.PermissionUser {
 		if comment.UserID != userId {
 			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
 				Code:  http.StatusUnauthorized,
@@ -99,7 +99,7 @@ func CommentDelete(c echo.Context) error {
 		}
 	}
 	// 管理员能删所有人的评论
-	if permission == model.PermissionUser {
+	if permission == util.PermissionUser {
 		err = model.DeleteCommentByID(uint(commentId))
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{

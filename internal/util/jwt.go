@@ -7,6 +7,27 @@ import (
 	"net/http"
 )
 
+// pathLevelJsonParser 用于建立PathLevel.json文件中字符串到权限数值的映射
+var pathLevelJsonParser map[string]int
+
+// InitPathLevelJsonParser  初始化用于解析PathLevel的映射
+func InitPathLevelJsonParser() {
+	pathLevelJsonParser = map[string]int{
+		"public":     PermissionPublic,
+		"user":       PermissionUser,
+		"node_admin": PermissionNodeAdmin,
+		"admin":      PermissionAdmin,
+	}
+}
+
+// 权限等级数字常量
+const (
+	PermissionPublic    = 0
+	PermissionUser      = 1
+	PermissionNodeAdmin = 2
+	PermissionAdmin     = 5
+)
+
 // JwtClaims 是一个结构体，用于存储JWT令牌的声明信息。
 type JwtClaims struct {
 	UserId     uint  `json:"userId"`
@@ -79,12 +100,14 @@ func JWTAuthMiddleware() echo.MiddlewareFunc {
 func PermissionMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			var level int
+			var exist bool
 			claims := c.Get("claims").(*JwtClaims)
 			permission := claims.Permission
-			if _, exist := config.PathLevel[c.Path()][c.Request().Method]; !exist {
+			if level, exist = getPermission(c); !exist {
 				return next(c)
 			}
-			if permission < config.PathLevel[c.Path()][c.Request().Method] {
+			if permission < level {
 				return echo.NewHTTPError(http.StatusUnauthorized, "permission denied")
 			}
 			return next(c)
@@ -92,15 +115,16 @@ func PermissionMiddleware() echo.MiddlewareFunc {
 	}
 }
 
+// Skipper 用于跳过不需鉴权的路径
 func Skipper(c echo.Context) bool {
-	if level, exist := config.PathLevel[c.Path()][c.Request().Method]; !exist || level != PermissionPublic {
+	if level, exist := getPermission(c); !exist || level != PermissionPublic {
 		return false
 	}
 	return true
 }
 
-const (
-	PermissionPublic = 0
-	PermissionUser   = 1
-	PermissionAdmin  = 2
-)
+// getPermission 获取请求路径的权限等级
+func getPermission(c echo.Context) (int, bool) {
+	result, exist := pathLevelJsonParser[config.PathLevel[c.Path()][c.Request().Method]]
+	return result, exist
+}
