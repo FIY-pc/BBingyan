@@ -24,7 +24,7 @@ type User struct {
 
 	Intro   string    `json:"intro"`
 	Avatar  string    `json:"avatar"`
-	Article []Article `json:"article" gorm:"-"` // forbid preload
+	Article []Article ` gorm:"foreignKey:UserID"` // forbid preload
 }
 
 func InitUser(db *gorm.DB) {

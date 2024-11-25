@@ -217,7 +217,7 @@ func UserUpdate(c echo.Context) error {
 
 	// 以下为比较适合在本路径更新的条目
 	if Intro := c.FormValue("intro"); Intro != "" {
-		user.UserInfo.Intro = Intro
+		user.Intro = Intro
 	}
 	if Password := c.FormValue("password"); Password != "" {
 		user.Password = Password
