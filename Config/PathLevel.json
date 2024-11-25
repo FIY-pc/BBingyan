@@ -55,5 +55,14 @@
   },
   "/comments/pages":{
     "GET": "user"
+  },
+  "/nodes": {
+    "GET": "user",
+    "POST": "user",
+    "PUT": "user",
+    "DELETE": "user"
+  },
+  "/nodes/articles":{
+    "GET": "user"
   }
 }
