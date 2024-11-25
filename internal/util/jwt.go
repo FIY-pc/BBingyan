@@ -2,7 +2,6 @@ package util
 
 import (
 	"github.com/FIY-pc/BBingyan/internal/config"
-	"github.com/FIY-pc/BBingyan/internal/model"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -94,8 +93,14 @@ func PermissionMiddleware() echo.MiddlewareFunc {
 }
 
 func Skipper(c echo.Context) bool {
-	if level, exist := config.PathLevel[c.Path()][c.Request().Method]; !exist || level != model.PermissionPublic {
+	if level, exist := config.PathLevel[c.Path()][c.Request().Method]; !exist || level != PermissionPublic {
 		return false
 	}
 	return true
 }
+
+const (
+	PermissionPublic = 0
+	PermissionUser   = 1
+	PermissionAdmin  = 2
+)
