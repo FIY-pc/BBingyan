@@ -7,12 +7,6 @@ import (
 	"time"
 )
 
-const (
-	PermissionPublic = 0
-	PermissionUser   = 1
-	PermissionAdmin  = 2
-)
-
 type User struct {
 	ID         uint      `json:"id" gorm:"primaryKey"`
 	Email      string    `json:"email" gorm:"unique"`
@@ -28,7 +22,7 @@ type User struct {
 }
 
 func InitUser(DB *gorm.DB) {
-	if err := postgresDb.AutoMigrate(&User{}); err != nil {
+	if err := DB.AutoMigrate(&User{}); err != nil {
 		panic(err)
 	}
 }
