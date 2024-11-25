@@ -15,6 +15,6 @@ func InitPostgres() {
 		panic(err)
 	}
 	InitUser(postgresDb)
-	InitArticle(postgresDb)
 	InitNode(postgresDb)
+	InitArticle(postgresDb)
 }

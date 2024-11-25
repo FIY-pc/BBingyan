@@ -8,15 +8,14 @@ import (
 
 // Article 文章模型
 type Article struct {
-	ID         uint      `json:"id" gorm:"primarykey"`
-	CreatedAt  time.Time `json:"created_at"`  // 文章创建时间
-	UpdatedAt  time.Time `json:"updated_at"`  // 文章更新时间
-	UserID     uint      `json:"user_id"`     // 文章作者的ID
-	Title      string    `json:"title"`       // 文章标题
-	CommentNum uint      `json:"comment_num"` // 文章评论数
-
-	Comment []Comment `json:"comment" gorm:"-"`                    // forbid preload
-	Content Content   `json:"content" gorm:"foreignKey:ArticleID"` // has one
+	ID        uint      `json:"id" gorm:"primarykey"`
+	CreatedAt time.Time `json:"created_at"` // 文章创建时间
+	UpdatedAt time.Time `json:"updated_at"` // 文章更新时间
+	UserID    uint      `json:"user_id"`    // 文章作者的ID
+	Title     string    `json:"title"`      // 文章标题
+	NodeID    uint      `json:"node_id"`
+	Comment   []Comment `json:"comment" gorm:"foreignKey:ArticleID;-"` // forbid preload
+	Content   Content   `json:"content" gorm:"foreignKey:ArticleID"`   // has one
 }
 
 // Content 文章内容表

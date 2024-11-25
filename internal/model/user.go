@@ -24,11 +24,11 @@ type User struct {
 
 	Intro   string    `json:"intro"`
 	Avatar  string    `json:"avatar"`
-	Article []Article ` gorm:"foreignKey:UserID"` // forbid preload
+	Article []Article ` gorm:"foreignKey:UserID;-"` // forbid preload
 }
 
-func InitUser(db *gorm.DB) {
-	if err := db.AutoMigrate(&User{}); err != nil {
+func InitUser(DB *gorm.DB) {
+	if err := postgresDb.AutoMigrate(&User{}); err != nil {
 		panic(err)
 	}
 }
