@@ -95,3 +95,11 @@ func DeleteUserByEmail(email string) error {
 	}
 	return nil
 }
+
+func GetUsersByIDs(ids []uint) ([]User, error) {
+	var users []User
+	if err := postgresDb.Where("id IN ?", ids).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}

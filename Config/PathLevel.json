@@ -42,10 +42,13 @@
   "/follows/mynum": {
     "GET": "user"
   },
-  "/follows/num":{
+  "/followers/num":{
     "GET": "user"
   },
-  "/follows/isfollow":{
+  "/follows/isfollowed":{
+    "GET": "user"
+  },
+  "/followers/":{
     "GET": "user"
   },
   "/comments":{

@@ -26,8 +26,9 @@ func InitRouter(e *echo.Echo) {
 	// follow
 	e.POST("/follows", controller.Follow)
 	e.DELETE("/follows", controller.Unfollow)
-	e.GET("/follows/num", controller.GetFollowerNum)
-	e.GET("/follows/isfollow", controller.IsFollowed)
+	e.GET("/follows/isfollowed", controller.IsFollowed)
+	e.GET("/followers/num", controller.GetFollowerNum)
+	e.GET("/followers", controller.ListFollower)
 
 	// Article
 	e.GET("/articles", controller.ArticleInfo)
