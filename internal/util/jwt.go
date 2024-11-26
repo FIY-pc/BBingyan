@@ -13,19 +13,17 @@ var pathLevelJsonParser map[string]int
 // InitPathLevelJsonParser  初始化用于解析PathLevel的映射
 func InitPathLevelJsonParser() {
 	pathLevelJsonParser = map[string]int{
-		"public":     PermissionPublic,
-		"user":       PermissionUser,
-		"node_admin": PermissionNodeAdmin,
-		"admin":      PermissionAdmin,
+		"public": PermissionPublic,
+		"user":   PermissionUser,
+		"admin":  PermissionAdmin,
 	}
 }
 
 // 权限等级数字常量
 const (
-	PermissionPublic    = 0
-	PermissionUser      = 1
-	PermissionNodeAdmin = 2
-	PermissionAdmin     = 5
+	PermissionPublic = 0
+	PermissionUser   = 1
+	PermissionAdmin  = 5
 )
 
 // JwtClaims 是一个结构体，用于存储JWT令牌的声明信息。

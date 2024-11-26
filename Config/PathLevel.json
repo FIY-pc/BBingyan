@@ -64,5 +64,10 @@
   },
   "/nodes/articles":{
     "GET": "user"
+  },
+  "/nodes/admins": {
+    "GET": "user",
+    "POST": "user",
+    "DELETE": "user"
   }
 }

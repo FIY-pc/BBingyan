@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/FIY-pc/BBingyan/internal/controller/params"
 	"github.com/FIY-pc/BBingyan/internal/model"
+	"github.com/FIY-pc/BBingyan/internal/util"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
@@ -146,6 +147,18 @@ func CreateNode(c echo.Context) error {
 			Error: err.Error(),
 		})
 	}
+	// 将创建者设置为默认管理员
+	claims := c.Get("claims").(util.JwtClaims)
+	userId := claims.UserId
+	err = model.AddNodeAdmin(nodeID, userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Add node admin failed",
+			Error: err.Error(),
+		})
+	}
+	// 返回结果
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
 		Msg:  "Create node successfully",
@@ -197,7 +210,8 @@ func ListArticleFromNode(c echo.Context) error {
 	}
 	// 获取排序方式
 	if rawsort == "" {
-		sort = model.SortByTitle
+		// 默认按时间排序
+		sort = model.SortByTime
 	} else {
 		sort, err = strconv.Atoi(rawsort)
 		if err != nil {
@@ -234,6 +248,126 @@ func ListArticleFromNode(c echo.Context) error {
 		"Data": map[string]interface{}{
 			"nodeID":      nodeID,
 			"articleList": articleList,
+		},
+	})
+}
+
+// AddNodeAdmin 添加节点管理员
+func AddNodeAdmin(c echo.Context) error {
+	nodeId, err := getNodeID(c)
+	if err != nil {
+		return err
+	}
+
+	claims := c.Get("claims").(util.JwtClaims)
+	userId := claims.UserId
+	permission := claims.Permission
+	// 权限认证,需节点管理员以上
+	if permission < util.PermissionAdmin {
+		if !model.IsNodeAdmin(nodeId, userId) {
+			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
+				Code:  http.StatusUnauthorized,
+				Msg:   "permission denied",
+				Error: "",
+			})
+		}
+	}
+	// 调用model
+	err = model.AddNodeAdmin(nodeId, userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Add node admin failed",
+			Error: err.Error(),
+		})
+	}
+	// 返回结果
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "Add node admin successfully",
+		Data: map[string]interface{}{
+			"nodeId": nodeId,
+			"userId": userId,
+		},
+	})
+}
+
+// DeleteNodeAdmin 删除节点管理员
+func DeleteNodeAdmin(c echo.Context) error {
+	var userId uint
+	nodeId, err := getNodeID(c)
+	if err != nil {
+		return err
+	}
+	// 获取claims信息
+	claims := c.Get("claims").(util.JwtClaims)
+	permission := claims.Permission
+	// 如果指定删除任意一位节点管理员,需要超级管理员权限
+	if rawUserId := c.QueryParam("userId"); rawUserId != "" {
+		iUserId, err := strconv.Atoi(rawUserId)
+		userId = uint(iUserId)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+				Code:  http.StatusBadRequest,
+				Msg:   "userId param is invalid",
+				Error: err.Error(),
+			})
+		}
+		if permission == util.PermissionAdmin {
+			err = model.DeleteNodeAdmin(nodeId, userId)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+					Code:  http.StatusInternalServerError,
+					Msg:   "Delete node admin failed",
+					Error: err.Error(),
+				})
+			}
+		}
+	} else {
+		// 如果不指定,则是管理员自己主动辞职
+		userId = claims.UserId
+		// 检查是否为该节点的管理员
+		if model.IsNodeAdmin(nodeId, userId) {
+			err = model.DeleteNodeAdmin(nodeId, userId)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+					Code:  http.StatusInternalServerError,
+					Msg:   "Delete node admin failed",
+					Error: err.Error(),
+				})
+			}
+		}
+	}
+	// 返回结果
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "Delete node admin successfully",
+		Data: nil,
+	})
+}
+
+// ListNodeAdmin 列出节点所有管理员
+func ListNodeAdmin(c echo.Context) error {
+	var admins []model.User
+	nodeId, err := getNodeID(c)
+	if err != nil {
+		return err
+	}
+	// 调用model
+	admins, err = model.ListNodeAdmin(nodeId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "List node admin failed",
+			Error: err.Error(),
+		})
+	}
+	// 返回结果
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "List node admin successfully",
+		Data: map[string]interface{}{
+			"adminList": admins,
 		},
 	})
 }

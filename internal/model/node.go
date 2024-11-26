@@ -10,16 +10,28 @@ type Node struct {
 	Name    string    `json:"name" gorm:"unique"`
 	Logo    string    `json:"logo"`
 	Article []Article `json:"article" gorm:"foreignKey:NodeID;-"` // forbid preload
+
+	Users []User `gorm:"many2many:user_nodes;" json:"users"` // 关联用户表
+}
+
+// UserNode 表示用户对节点管理权限的关联表
+type UserNode struct {
+	UserID uint `gorm:"primaryKey"`
+	NodeID uint `gorm:"primaryKey"`
 }
 
 const (
 	SortByTitle      = 1
 	SortByLikeNum    = 2
 	SortByCommentNum = 3
+	SortByTime       = 4
 )
 
 func InitNode(DB *gorm.DB) {
 	if err := DB.AutoMigrate(&Node{}); err != nil {
+		panic(err)
+	}
+	if err := DB.AutoMigrate(&UserNode{}); err != nil {
 		panic(err)
 	}
 }
@@ -85,6 +97,14 @@ func ListArticleFromNode(nodeId uint, page int, pageSize int, sortMethod int) ([
 			Where("node_id", nodeId).
 			Find(&articles)
 	}
+	if sortMethod == SortByTime {
+		result = postgresDb.
+			Offset((page-1)*pageSize).
+			Limit(pageSize).
+			Where("node_id", nodeId).
+			Order("created_at DESC").
+			Find(&articles)
+	}
 	if result != nil {
 		return articles, result.Error
 	}
@@ -101,4 +121,44 @@ func CountArticleFromNode(nodeId uint) (int64, error) {
 		return 0, result.Error
 	}
 	return count, nil
+}
+
+func AddNodeAdmin(nodeId, userId uint) error {
+	link := UserNode{UserID: userId, NodeID: nodeId}
+	if err := postgresDb.Create(&link).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteNodeAdmin(nodeId, userId uint) error {
+	if err := postgresDb.Delete(&UserNode{UserID: userId, NodeID: nodeId}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func ListNodeAdmin(nodeId uint) ([]User, error) {
+	var Admin []User
+	var result *gorm.DB
+	result =
+		postgresDb.Model(&User{}).
+			Select("users.*").
+			Joins("LEFT JOIN user_nodes ON users.id = user_nodes.user_id").
+			Where("user_nodes.node_id = ?", nodeId).
+			Find(&Admin)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return Admin, nil
+}
+
+func IsNodeAdmin(nodeId, userId uint) bool {
+	result := postgresDb.
+		Where("node_id = ? AND user_id = ?", nodeId, userId).
+		First(&UserNode{})
+	if result.Error != nil {
+		return false
+	}
+	return true
 }

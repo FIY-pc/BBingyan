@@ -12,13 +12,15 @@ type User struct {
 	Email      string    `json:"email" gorm:"unique"`
 	Nickname   string    `json:"nickname"`
 	Password   string    `json:"password"`
-	Permission int       `json:"permission" gorm:"default:1"` // 权限级别，普通用户为0，节点管理员为1，最高管理员为2
+	Permission int       `json:"permission" gorm:"default:1"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updatedAt"`
 
 	Intro   string    `json:"intro"`
 	Avatar  string    `json:"avatar"`
 	Article []Article ` gorm:"foreignKey:UserID;-"` // forbid preload
+
+	Nodes []Node `gorm:"many2many:user_nodes;" json:"nodes"` // 关联节点表
 }
 
 func InitUser(DB *gorm.DB) {
@@ -27,6 +29,7 @@ func InitUser(DB *gorm.DB) {
 	}
 }
 
+// InitSuperAdmin 初始化一个超级管理员
 func InitSuperAdmin() {
 	var err error
 	_, err = GetUserByEmail(config.Config.User.Admin.Email)

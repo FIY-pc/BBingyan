@@ -52,4 +52,8 @@ func InitRouter(e *echo.Echo) {
 	e.DELETE("/nodes", controller.DeleteNode)
 	e.PUT("/nodes", controller.UpdateNode)
 	e.GET("/nodes/articles", controller.ListArticleFromNode)
+	// node admin
+	e.POST("/nodes/admins", controller.AddNodeAdmin)
+	e.DELETE("/nodes/admins", controller.DeleteNodeAdmin)
+	e.GET("/nodes/admins", controller.ListNodeAdmin)
 }
