@@ -1,0 +1,19 @@
+version: "3"
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "10111:10111"
+    depends_on:
+      - db
+    restart: always
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: bbingyan
+    ports:
+      - "5432:5432"
