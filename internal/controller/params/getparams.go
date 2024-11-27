@@ -2,6 +2,7 @@ package params
 
 import (
 	"errors"
+	"github.com/FIY-pc/BBingyan/internal/model"
 	"github.com/FIY-pc/BBingyan/internal/util"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -23,13 +24,22 @@ func GetClaimsInfo(c echo.Context) (uint, int, error) {
 	return userId, permission, nil
 }
 
-// GetUserId 获取UserId,参数未提供则获取自身ID
+// GetUserId 获取UserId,参数未提供则检测邮箱，否则获取自身ID
 func GetUserId(c echo.Context) (uint, error) {
 	var userId uint
 	rawUserId := c.QueryParam("userId")
+	email := c.QueryParam("email")
 	if rawUserId == "" {
-		claims := c.Get("claims").(util.JwtClaims)
-		userId = claims.UserId
+		if email != "" {
+			user, err := model.GetUserByEmail(email)
+			if err != nil {
+				return 0, CommonErrorGenerate(c, http.StatusBadRequest, "Invalid email", nil)
+			}
+			userId = user.ID
+		} else {
+			claims := c.Get("claims").(util.JwtClaims)
+			userId = claims.UserId
+		}
 	} else {
 		iUserId, err := strconv.Atoi(rawUserId)
 		if err != nil {
