@@ -9,35 +9,26 @@ import (
 	"strconv"
 )
 
-const (
-	nodeIDIsEmpty   = 0
-	nodeIDIsInvalid = 1
-)
-
 // NodeInfo 获取节点基本信息,可以使用ID或Name进行查询
 func NodeInfo(c echo.Context) error {
 	var resultNode model.Node
 	// 获取ID
-	nodeID, err := getNodeID(c)
+	nodeID, err := params.GetNodeID(c)
 
 	// 若ID为空,获取name
-	if nodeID == nodeIDIsEmpty {
+	if nodeID == params.NodeIDIsEmpty {
 		name := c.QueryParam("name")
 		resultNode, err = model.GetNodeByName(name)
 	} else {
 		// 使用ID进行查询
-		if nodeID == nodeIDIsInvalid {
+		if nodeID == params.NodeIDIsInvalid {
 			return err
 		}
 		resultNode, err = model.GetNodeById(nodeID)
 	}
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get node failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Get node failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
@@ -50,18 +41,14 @@ func NodeInfo(c echo.Context) error {
 func UpdateNode(c echo.Context) error {
 	var node model.Node
 	// 获取ID
-	nodeID, err := getNodeID(c)
+	nodeID, err := params.GetNodeID(c)
 	if err != nil {
 		return err
 	}
 	// 获取原节点信息
 	node, err = model.GetNodeById(nodeID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get node failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Get node failed", err)
 	}
 	// 更新信息
 	name := c.FormValue("name")
@@ -75,11 +62,7 @@ func UpdateNode(c echo.Context) error {
 	// 调用model
 	err = model.UpdateNode(node)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Update node failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Update node failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
@@ -90,17 +73,13 @@ func UpdateNode(c echo.Context) error {
 
 // DeleteNode 删除节点
 func DeleteNode(c echo.Context) error {
-	nodeID, err := getNodeID(c)
+	nodeID, err := params.GetNodeID(c)
 	if err != nil {
 		return err
 	}
 	err = model.DeleteNodeById(nodeID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Delete node failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Delete node failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
@@ -112,27 +91,19 @@ func DeleteNode(c echo.Context) error {
 func CreateNode(c echo.Context) error {
 	var node model.Node
 	// 获取ID
-	nodeID, err := getNodeID(c)
+	nodeID, err := params.GetNodeID(c)
 	if err != nil {
 		return err
 	}
 	// 检查是否已经存在
 	_, err = model.GetNodeById(nodeID)
 	if err == nil {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Node already exists",
-			Error: "",
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "node existed", err)
 	}
 	// 获取其余信息
 	name := c.FormValue("name")
 	if name == "" {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Name is empty",
-			Error: "",
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "name can't be empty", err)
 	}
 	logo := c.FormValue("logo")
 	if logo != "" {
@@ -141,22 +112,14 @@ func CreateNode(c echo.Context) error {
 	// 创建节点
 	err = model.CreateNode(node)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Create node failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Create node failed", err)
 	}
 	// 将创建者设置为默认管理员
 	claims := c.Get("claims").(util.JwtClaims)
 	userId := claims.UserId
 	err = model.AddNodeAdmin(nodeID, userId)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Add node admin failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "add admin failed", err)
 	}
 	// 返回结果
 	return c.JSON(http.StatusOK, params.Common200Resp{
@@ -168,7 +131,7 @@ func CreateNode(c echo.Context) error {
 
 // ListArticleFromNode 分页查询同一节点下的文章,提供多种排序方式
 func ListArticleFromNode(c echo.Context) error {
-	nodeID, err := getNodeID(c)
+	nodeID, err := params.GetNodeID(c)
 	if err != nil {
 		return err
 	}
@@ -178,35 +141,19 @@ func ListArticleFromNode(c echo.Context) error {
 	rawSort := c.QueryParam("sort")
 	// 获取page
 	if rawPage == "" {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "page param is empty",
-			Error: "",
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "page can't be empty", err)
 	}
 	page, err = strconv.Atoi(rawSort)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "page param is invalid",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Invalid page params", err)
 	}
 	// 获取pageSize
 	if rawPageSize == "" {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "page param is empty",
-			Error: "",
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "page can't be empty", err)
 	}
 	pageSize, err = strconv.Atoi(rawPageSize)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "page param is invalid",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Invalid pageSize params", err)
 	}
 	// 获取排序方式
 	if rawSort == "" {
@@ -215,30 +162,18 @@ func ListArticleFromNode(c echo.Context) error {
 	} else {
 		sort, err = strconv.Atoi(rawSort)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-				Code:  http.StatusBadRequest,
-				Msg:   "sort param is invalid",
-				Error: err.Error(),
-			})
+			return params.CommonErrorGenerate(c, http.StatusBadRequest, "Invalid sort params", err)
 		}
 	}
 	// 执行查询
 	articleList, err := model.ListArticleFromNode(nodeID, page, pageSize, sort)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "List article failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "List article failed", err)
 	}
 	// 查询节点文章数
 	count, err := model.CountArticleFromNode(nodeID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Count article failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Count article failed", err)
 	}
 	// 返回结果
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -254,7 +189,7 @@ func ListArticleFromNode(c echo.Context) error {
 
 // AddNodeAdmin 添加节点管理员
 func AddNodeAdmin(c echo.Context) error {
-	nodeId, err := getNodeID(c)
+	nodeId, err := params.GetNodeID(c)
 	if err != nil {
 		return err
 	}
@@ -262,11 +197,7 @@ func AddNodeAdmin(c echo.Context) error {
 	rawAddAdmin := c.FormValue("user_id")
 	addAdmin, err := strconv.Atoi(rawAddAdmin)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "add admin param is invalid",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Invalid user_id", err)
 	}
 
 	claims := c.Get("claims").(util.JwtClaims)
@@ -275,21 +206,13 @@ func AddNodeAdmin(c echo.Context) error {
 	// 权限认证,需节点管理员以上
 	if permission < util.PermissionAdmin {
 		if !model.IsNodeAdmin(nodeId, userId) {
-			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
-				Code:  http.StatusUnauthorized,
-				Msg:   "permission denied",
-				Error: "",
-			})
+			return params.CommonErrorGenerate(c, http.StatusUnauthorized, "permission not allowed", err)
 		}
 	}
 	// 调用model
 	err = model.AddNodeAdmin(nodeId, uint(addAdmin))
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Add node admin failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "add admin failed", err)
 	}
 	// 返回结果
 	return c.JSON(http.StatusOK, params.Common200Resp{
@@ -305,7 +228,7 @@ func AddNodeAdmin(c echo.Context) error {
 // DeleteNodeAdmin 删除节点管理员
 func DeleteNodeAdmin(c echo.Context) error {
 	var userId uint
-	nodeId, err := getNodeID(c)
+	nodeId, err := params.GetNodeID(c)
 	if err != nil {
 		return err
 	}
@@ -317,20 +240,12 @@ func DeleteNodeAdmin(c echo.Context) error {
 		iUserId, err := strconv.Atoi(rawUserId)
 		userId = uint(iUserId)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-				Code:  http.StatusBadRequest,
-				Msg:   "userId param is invalid",
-				Error: err.Error(),
-			})
+			return params.CommonErrorGenerate(c, http.StatusBadRequest, "Invalid user_id", err)
 		}
 		if permission == util.PermissionAdmin {
 			err = model.DeleteNodeAdmin(nodeId, userId)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-					Code:  http.StatusInternalServerError,
-					Msg:   "Delete node admin failed",
-					Error: err.Error(),
-				})
+				return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Delete node admin failed", err)
 			}
 		}
 	} else {
@@ -340,11 +255,7 @@ func DeleteNodeAdmin(c echo.Context) error {
 		if model.IsNodeAdmin(nodeId, userId) {
 			err = model.DeleteNodeAdmin(nodeId, userId)
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-					Code:  http.StatusInternalServerError,
-					Msg:   "Delete node admin failed",
-					Error: err.Error(),
-				})
+				return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Delete node admin failed", err)
 			}
 		}
 	}
@@ -359,18 +270,14 @@ func DeleteNodeAdmin(c echo.Context) error {
 // ListNodeAdmin 列出节点所有管理员
 func ListNodeAdmin(c echo.Context) error {
 	var admins []model.User
-	nodeId, err := getNodeID(c)
+	nodeId, err := params.GetNodeID(c)
 	if err != nil {
 		return err
 	}
 	// 调用model
 	admins, err = model.ListNodeAdmin(nodeId)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "List node admin failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "List node admin failed", err)
 	}
 	// 返回结果
 	return c.JSON(http.StatusOK, params.Common200Resp{
@@ -380,25 +287,4 @@ func ListNodeAdmin(c echo.Context) error {
 			"adminList": admins,
 		},
 	})
-}
-
-// getNodeID 获取并转换nodeID
-func getNodeID(c echo.Context) (uint, error) {
-	rawNodeID := c.QueryParam("node_id")
-	if rawNodeID == "" {
-		return nodeIDIsEmpty, c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "NodeID is empty",
-			Error: "",
-		})
-	}
-	nodeID, err := strconv.Atoi(rawNodeID)
-	if err != nil {
-		return nodeIDIsInvalid, c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "NodeID is invalid",
-			Error: err.Error(),
-		})
-	}
-	return uint(nodeID), nil
 }

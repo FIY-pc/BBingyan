@@ -6,19 +6,17 @@ import (
 	"github.com/FIY-pc/BBingyan/internal/util"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strconv"
 )
 
+// ArticleInfo 获取文章
 func ArticleInfo(c echo.Context) error {
-	rawArticleId := c.QueryParam("article_id")
-	ArticleId, err := strconv.Atoi(rawArticleId)
-	article, err := model.GetArticleByID(uint(ArticleId))
+	articleId, err := params.GetArticleId(c)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get article failed",
-			Error: err.Error(),
-		})
+		return err
+	}
+	article, err := model.GetArticleByID(articleId)
+	if err != nil {
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "article info failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
@@ -27,6 +25,7 @@ func ArticleInfo(c echo.Context) error {
 	})
 }
 
+// ArticleCreate 创建文章
 func ArticleCreate(c echo.Context) error {
 	var err error
 	article := model.Article{}
@@ -38,17 +37,15 @@ func ArticleCreate(c echo.Context) error {
 		article.Content.Text = content
 	}
 	// 绑定作者ID
-	claims := c.Get("claims").(util.JwtClaims)
-	userId := claims.UserId
+	userId, _, err := params.GetClaimsInfo(c)
+	if err != nil {
+		return err
+	}
 	article.UserID = userId
 
 	err = model.CreateArticle(article)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Create article failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "create article failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
@@ -57,59 +54,32 @@ func ArticleCreate(c echo.Context) error {
 	})
 }
 
+// ArticleUpdate 更新文章
 func ArticleUpdate(c echo.Context) error {
-	id, err := strconv.Atoi(c.QueryParam("article_id"))
+	articleId, err := params.GetArticleId(c)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Parse id failed",
-			Error: err.Error(),
-		})
+		return err
 	}
-	article, err := model.GetArticleByID(uint(id))
+	article, err := model.GetArticleByID(articleId)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Parse article failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "article update failed", err)
+	}
+	// 检查权限
+	if !articlePermissionCheck(c, articleId) {
+		return params.CommonErrorGenerate(c, http.StatusUnauthorized, "permission check failed", err)
 	}
 
-	claims := c.Get("claims").(util.JwtClaims)
-	userId := claims.UserId
-	Permission := claims.Permission
-	// 查询权限，若为管理员以下，则检查是否为文章作者
-	if Permission < util.PermissionAdmin {
-		article, err := model.GetArticleByID(uint(id))
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-				Code:  http.StatusInternalServerError,
-				Msg:   "Get article failed",
-				Error: err.Error(),
-			})
-		}
-		if article.UserID != userId {
-			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
-				Code:  http.StatusUnauthorized,
-				Msg:   "Unauthorized",
-				Error: "",
-			})
-		}
-	}
-
+	// 获取其余参数
 	if title := c.FormValue("title"); title != "" {
 		article.Title = title
 	}
 	if content := c.FormValue("content"); content != "" {
 		article.Content.Text = content
 	}
+	// 更新文章
 	err = model.UpdateArticle(*article)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Update article failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "article update failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
@@ -118,48 +88,41 @@ func ArticleUpdate(c echo.Context) error {
 	})
 }
 
+// ArticleDelete 删除文章
 func ArticleDelete(c echo.Context) error {
-	id, err := strconv.Atoi(c.QueryParam("article_id"))
+	articleId, err := params.GetArticleId(c)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Parse id failed",
-			Error: err.Error(),
-		})
+		return err
 	}
-	claims := c.Get("claims").(util.JwtClaims)
-	userId := claims.UserId
-	Permission := claims.Permission
-	// 查询权限，若为管理员以下，则检查是否为文章作者
-	if Permission < util.PermissionAdmin {
-		article, err := model.GetArticleByID(uint(id))
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-				Code:  http.StatusInternalServerError,
-				Msg:   "Get article failed",
-				Error: err.Error(),
-			})
-		}
-		if article.UserID != userId {
-			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
-				Code:  http.StatusUnauthorized,
-				Msg:   "Unauthorized",
-				Error: "",
-			})
-		}
+	// 权限检查
+	if !articlePermissionCheck(c, articleId) {
+		return params.CommonErrorGenerate(c, http.StatusUnauthorized, "permission check failed", err)
 	}
-
-	err = model.DeleteArticleByID(uint(id))
+	// 删除文章
+	err = model.DeleteArticleByID(articleId)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Delete article failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "article delete failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
 		Msg:  "Delete article success",
 		Data: nil,
 	})
+}
+
+// articlePermissionCheck 检查是否有权限操作本文章,仅管理员或文章作者有权操作
+func articlePermissionCheck(c echo.Context, articleId uint) bool {
+	claims := c.Get("claims").(util.JwtClaims)
+	userId := claims.UserId
+	Permission := claims.Permission
+	if Permission < util.PermissionAdmin {
+		article, err := model.GetArticleByID(articleId)
+		if err != nil {
+			return false
+		}
+		if article.UserID != userId {
+			return false
+		}
+	}
+	return true
 }

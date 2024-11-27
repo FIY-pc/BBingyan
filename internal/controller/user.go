@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"github.com/FIY-pc/BBingyan/internal/config"
 	"github.com/FIY-pc/BBingyan/internal/controller/params"
 	"github.com/FIY-pc/BBingyan/internal/model"
@@ -18,39 +19,22 @@ func Login(c echo.Context) error {
 	captcha := c.FormValue("captcha")
 
 	if email == "" || password == "" || captcha == "" {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Email, password and captcha are required",
-			Error: "",
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Login failed", errors.New("email,password and captcha are required"))
 	}
 	// 验证邮箱
 	user, err := model.GetUserByEmail(email)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "User not found",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Login failed", err)
 	}
 	// 验证密码
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Password is incorrect",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Login failed", err)
 	}
-
 	// 验证验证码
 	ok := util.AuthCaptcha(email, captcha)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Captcha is incorrect",
-			Error: "",
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Login failed", err)
 	}
 	// 生成token
 	claims := util.JwtClaims{
@@ -60,11 +44,7 @@ func Login(c echo.Context) error {
 	}
 	token, err := util.GenerateToken(claims)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Generate token failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Login failed", err)
 	}
 	// 返回成功响应
 	return c.JSON(http.StatusOK, params.Common200Resp{
@@ -84,20 +64,12 @@ func GetCaptcha(c echo.Context) error {
 	captcha := util.GenerateCaptcha()
 	err = util.SendCaptcha(email, captcha)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Sending captcha failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "send captcha failed", err)
 	}
 	// 记录验证码
 	err = util.AddCaptcha(email, captcha)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Add captcha failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Add captcha failed", err)
 	}
 	// 返回成功响应
 	return c.JSON(http.StatusOK, params.Common200Resp{
@@ -113,53 +85,23 @@ func Register(c echo.Context) error {
 	password := c.FormValue("password")
 	captcha := c.FormValue("captcha")
 
-	if email == "" {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Email is null",
-			Error: "",
-		})
-	}
-	if password == "" {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Password is null",
-			Error: "",
-		})
-	}
-	if captcha == "" {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Captcha is null",
-			Error: "",
-		})
+	if email == "" || password == "" || captcha == "" {
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Register failed", errors.New("email,password and captcha is required"))
 	}
 	// 检查该邮箱是否已注册
 	_, err = model.GetUserByEmail(email)
 	if err == nil {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Email already exists",
-			Error: "",
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Register failed", errors.New("email already exist"))
 	}
 	// 验证邮箱
 	ok := util.AuthCaptcha(email, captcha)
 	if !ok {
-		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-			Code:  http.StatusBadRequest,
-			Msg:   "Captcha is incorrect",
-			Error: "",
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "Register failed", err)
 	}
 	// 加密密码
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Hash password failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Register failed", err)
 	}
 	// 注册用户
 	user := &model.User{
@@ -169,11 +111,7 @@ func Register(c echo.Context) error {
 	}
 	err = model.CreateUser(user)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Create user failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "Register failed", err)
 	}
 	// 返回成功响应
 	return c.JSON(http.StatusOK, params.Common200Resp{
@@ -187,15 +125,14 @@ func Register(c echo.Context) error {
 }
 
 func UserInfo(c echo.Context) error {
-	email := c.FormValue("email")
-	user := &model.User{}
-	user, err := model.GetUserByEmail(email)
+	userId, err := params.GetUserId(c)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get user failed",
-			Error: err.Error(),
-		})
+		return err
+	}
+	user := &model.User{}
+	user, err = model.GetUserByID(userId)
+	if err != nil {
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "User info failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
@@ -205,37 +142,17 @@ func UserInfo(c echo.Context) error {
 }
 
 func UserUpdate(c echo.Context) error {
-	email := c.FormValue("email")
+	// 获取userId
+	userId, err := params.GetUserId(c)
+	if err != nil {
+		return err
+	}
 	// 权限验证环节,仅自己和超级管理员可更改
-	claims := c.Get("claims").(util.JwtClaims)
-	userId := claims.UserId
-	permission := claims.Permission
-	resultUser, err := model.GetUserByID(userId)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get user failed",
-			Error: err.Error(),
-		})
+	if !userPermissionCheck(c, userId) {
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "User info failed", errors.New("permission denied"))
 	}
-	if permission < util.PermissionAdmin {
-		if resultUser.Email != email {
-			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
-				Code:  http.StatusUnauthorized,
-				Msg:   "You are not allowed to delete this user",
-				Error: "",
-			})
-		}
-	}
-	user, err := model.GetUserByEmail(email)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get user failed",
-			Error: err.Error(),
-		})
-	}
-
+	// 获取user
+	user, err := model.GetUserByID(userId)
 	// 以下为比较适合在本路径更新的条目
 	if Intro := c.FormValue("intro"); Intro != "" {
 		user.Intro = Intro
@@ -245,23 +162,16 @@ func UserUpdate(c echo.Context) error {
 	}
 	if Nickname := c.FormValue("nickname"); Nickname != "" {
 		if len(Nickname) > config.Config.User.Nickname.Maxlength {
-			return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
-				Code:  http.StatusBadRequest,
-				Msg:   "Nickname is too long",
-				Error: "",
-			})
+			return params.CommonErrorGenerate(c, http.StatusBadRequest, "Nickname too long", errors.New("nickname too long"))
 		}
 		user.Nickname = Nickname
 	}
-
+	// 更新user
 	err = model.UpdateUser(user)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Update user failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "User info failed", err)
 	}
+	// 返回结果
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
 		Msg:  "User update success",
@@ -270,36 +180,18 @@ func UserUpdate(c echo.Context) error {
 }
 
 func UserDelete(c echo.Context) error {
-	email := c.FormValue("email")
-	claims := c.Get("claims").(util.JwtClaims)
-	userId := claims.UserId
-	permission := claims.Permission
-	resultUser, err := model.GetUserByID(userId)
+	// 获取userId
+	userId, err := params.GetUserId(c)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get user failed",
-			Error: err.Error(),
-		})
+		return err
 	}
-	// 要么超级管理员删号，要么自己注销
-	// TODO: 如果是用户自行注销，后续需要一个再次确认环节，需要正确验证码才能成功删号
-	if permission < util.PermissionAdmin {
-		if resultUser.Email != email {
-			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
-				Code:  http.StatusUnauthorized,
-				Msg:   "You are not allowed to delete this user",
-				Error: "",
-			})
-		}
+	// 权限验证环节,仅自己和超级管理员可更改
+	if !userPermissionCheck(c, userId) {
+		return params.CommonErrorGenerate(c, http.StatusUnauthorized, "User info failed", errors.New("permission denied"))
 	}
-	err = model.DeleteUserByEmail(email)
+	err = model.DeleteUserByID(userId)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Delete user failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "User info failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
@@ -313,15 +205,23 @@ func GetUserByNickName(c echo.Context) error {
 	nickname := c.QueryParam("nickname")
 	user, err := model.GetUserByNickname(nickname)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
-			Code:  http.StatusInternalServerError,
-			Msg:   "Get user failed",
-			Error: err.Error(),
-		})
+		return params.CommonErrorGenerate(c, http.StatusBadRequest, "User info failed", err)
 	}
 	return c.JSON(http.StatusOK, params.Common200Resp{
 		Code: http.StatusOK,
 		Msg:  "User info success",
 		Data: user,
 	})
+}
+
+// userPermissionCheck 检查是否有权限对用户进行敏感操作
+func userPermissionCheck(c echo.Context, userId uint) bool {
+	claimsId, permission, err := params.GetClaimsInfo(c)
+	if err != nil {
+		return false
+	}
+	if userId != claimsId && permission < util.PermissionAdmin {
+		return false
+	}
+	return true
 }
