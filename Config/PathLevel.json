@@ -63,7 +63,7 @@
     "GET": "user",
     "POST": "user",
     "PUT": "user",
-    "DELETE": "user"
+    "DELETE": "admin"
   },
   "/nodes/articles":{
     "GET": "user"

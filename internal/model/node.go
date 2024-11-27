@@ -10,7 +10,7 @@ type Node struct {
 	Name    string    `json:"name" gorm:"unique"`
 	Logo    string    `json:"logo"`
 	Article []Article `json:"article" gorm:"foreignKey:NodeID;-"` // forbid preload
-
+	// TODO 节点简介
 	Users []User `gorm:"many2many:user_nodes;" json:"users"` // 关联用户表
 }
 

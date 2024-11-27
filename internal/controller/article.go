@@ -58,7 +58,7 @@ func ArticleCreate(c echo.Context) error {
 }
 
 func ArticleUpdate(c echo.Context) error {
-	id, err := strconv.Atoi(c.FormValue("id"))
+	id, err := strconv.Atoi(c.QueryParam("article_id"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
 			Code:  http.StatusInternalServerError,
@@ -97,10 +97,10 @@ func ArticleUpdate(c echo.Context) error {
 		}
 	}
 
-	if title := c.QueryParam("title"); title != "" {
+	if title := c.FormValue("title"); title != "" {
 		article.Title = title
 	}
-	if content := c.QueryParam("content"); content != "" {
+	if content := c.FormValue("content"); content != "" {
 		article.Content.Text = content
 	}
 	err = model.UpdateArticle(*article)
@@ -119,7 +119,7 @@ func ArticleUpdate(c echo.Context) error {
 }
 
 func ArticleDelete(c echo.Context) error {
-	id, err := strconv.Atoi(c.FormValue("id"))
+	id, err := strconv.Atoi(c.QueryParam("article_id"))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
 			Code:  http.StatusInternalServerError,

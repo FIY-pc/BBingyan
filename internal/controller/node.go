@@ -29,7 +29,7 @@ func NodeInfo(c echo.Context) error {
 		if nodeID == nodeIDIsInvalid {
 			return err
 		}
-		resultNode, err = model.GetNodeById(uint(nodeID))
+		resultNode, err = model.GetNodeById(nodeID)
 	}
 
 	if err != nil {
@@ -55,7 +55,7 @@ func UpdateNode(c echo.Context) error {
 		return err
 	}
 	// 获取原节点信息
-	node, err = model.GetNodeById(uint(nodeID))
+	node, err = model.GetNodeById(nodeID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
 			Code:  http.StatusInternalServerError,
@@ -64,11 +64,11 @@ func UpdateNode(c echo.Context) error {
 		})
 	}
 	// 更新信息
-	name := c.QueryParam("name")
+	name := c.FormValue("name")
 	if name != "" {
 		node.Name = name
 	}
-	logo := c.QueryParam("logo")
+	logo := c.FormValue("logo")
 	if logo != "" {
 		node.Logo = logo
 	}
@@ -94,7 +94,7 @@ func DeleteNode(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	err = model.DeleteNodeById(uint(nodeID))
+	err = model.DeleteNodeById(nodeID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
 			Code:  http.StatusInternalServerError,
@@ -117,7 +117,7 @@ func CreateNode(c echo.Context) error {
 		return err
 	}
 	// 检查是否已经存在
-	_, err = model.GetNodeById(uint(nodeID))
+	_, err = model.GetNodeById(nodeID)
 	if err == nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
@@ -126,7 +126,7 @@ func CreateNode(c echo.Context) error {
 		})
 	}
 	// 获取其余信息
-	name := c.QueryParam("name")
+	name := c.FormValue("name")
 	if name == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
@@ -134,7 +134,7 @@ func CreateNode(c echo.Context) error {
 			Error: "",
 		})
 	}
-	logo := c.QueryParam("logo")
+	logo := c.FormValue("logo")
 	if logo != "" {
 		node.Logo = logo
 	}
@@ -173,18 +173,18 @@ func ListArticleFromNode(c echo.Context) error {
 		return err
 	}
 	var page, pageSize, sort int
-	rawpage := c.QueryParam("page")
-	rawpageSize := c.QueryParam("pageSize")
-	rawsort := c.QueryParam("sort")
+	rawPage := c.QueryParam("page")
+	rawPageSize := c.QueryParam("pageSize")
+	rawSort := c.QueryParam("sort")
 	// 获取page
-	if rawpage == "" {
+	if rawPage == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
 			Msg:   "page param is empty",
 			Error: "",
 		})
 	}
-	page, err = strconv.Atoi(rawsort)
+	page, err = strconv.Atoi(rawSort)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
@@ -193,14 +193,14 @@ func ListArticleFromNode(c echo.Context) error {
 		})
 	}
 	// 获取pageSize
-	if rawpageSize == "" {
+	if rawPageSize == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
 			Msg:   "page param is empty",
 			Error: "",
 		})
 	}
-	pageSize, err = strconv.Atoi(rawpageSize)
+	pageSize, err = strconv.Atoi(rawPageSize)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
@@ -209,11 +209,11 @@ func ListArticleFromNode(c echo.Context) error {
 		})
 	}
 	// 获取排序方式
-	if rawsort == "" {
+	if rawSort == "" {
 		// 默认按时间排序
 		sort = model.SortByTime
 	} else {
-		sort, err = strconv.Atoi(rawsort)
+		sort, err = strconv.Atoi(rawSort)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 				Code:  http.StatusBadRequest,
@@ -259,6 +259,16 @@ func AddNodeAdmin(c echo.Context) error {
 		return err
 	}
 
+	rawAddAdmin := c.FormValue("user_id")
+	addAdmin, err := strconv.Atoi(rawAddAdmin)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+			Code:  http.StatusBadRequest,
+			Msg:   "add admin param is invalid",
+			Error: err.Error(),
+		})
+	}
+
 	claims := c.Get("claims").(util.JwtClaims)
 	userId := claims.UserId
 	permission := claims.Permission
@@ -273,7 +283,7 @@ func AddNodeAdmin(c echo.Context) error {
 		}
 	}
 	// 调用model
-	err = model.AddNodeAdmin(nodeId, userId)
+	err = model.AddNodeAdmin(nodeId, uint(addAdmin))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
 			Code:  http.StatusInternalServerError,
@@ -303,7 +313,7 @@ func DeleteNodeAdmin(c echo.Context) error {
 	claims := c.Get("claims").(util.JwtClaims)
 	permission := claims.Permission
 	// 如果指定删除任意一位节点管理员,需要超级管理员权限
-	if rawUserId := c.QueryParam("userId"); rawUserId != "" {
+	if rawUserId := c.QueryParam("user_id"); rawUserId != "" {
 		iUserId, err := strconv.Atoi(rawUserId)
 		userId = uint(iUserId)
 		if err != nil {
@@ -374,7 +384,7 @@ func ListNodeAdmin(c echo.Context) error {
 
 // getNodeID 获取并转换nodeID
 func getNodeID(c echo.Context) (uint, error) {
-	rawNodeID := c.QueryParam("nodeId")
+	rawNodeID := c.QueryParam("node_id")
 	if rawNodeID == "" {
 		return nodeIDIsEmpty, c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,

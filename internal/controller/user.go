@@ -206,6 +206,27 @@ func UserInfo(c echo.Context) error {
 
 func UserUpdate(c echo.Context) error {
 	email := c.FormValue("email")
+	// 权限验证环节,仅自己和超级管理员可更改
+	claims := c.Get("claims").(util.JwtClaims)
+	userId := claims.UserId
+	permission := claims.Permission
+	resultUser, err := model.GetUserByID(userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Get user failed",
+			Error: err.Error(),
+		})
+	}
+	if permission < util.PermissionAdmin {
+		if resultUser.Email != email {
+			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
+				Code:  http.StatusUnauthorized,
+				Msg:   "You are not allowed to delete this user",
+				Error: "",
+			})
+		}
+	}
 	user, err := model.GetUserByEmail(email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{

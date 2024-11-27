@@ -12,7 +12,7 @@ import (
 // CommentCreate 评论
 func CommentCreate(c echo.Context) error {
 	// 获取并转换文章id,顺便检查id是否有效
-	rawarticleId := c.QueryParam("id")
+	rawarticleId := c.QueryParam("article_id")
 	articleId, err := strconv.Atoi(rawarticleId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
@@ -51,7 +51,7 @@ func CommentCreate(c echo.Context) error {
 // CommentDelete 删评,做了权限区分,user仅能删自己的评论,admin可删所有评论
 func CommentDelete(c echo.Context) error {
 	// 获取评论id
-	rawCommentId := c.QueryParam("commentId")
+	rawCommentId := c.QueryParam("comment_id")
 	if rawCommentId == "" {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
 			Code:  http.StatusBadRequest,
@@ -119,7 +119,7 @@ func CommentDelete(c echo.Context) error {
 
 // CommentGetById 使用id查询单条评论
 func CommentGetById(c echo.Context) error {
-	rawCommentId := c.QueryParam("id")
+	rawCommentId := c.QueryParam("comment_id")
 	commentId, err := strconv.Atoi(rawCommentId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
@@ -146,7 +146,7 @@ func CommentGetById(c echo.Context) error {
 // CommentList 获取文章评论,进行分页处理,关键参数:page,pageSize,articleId
 func CommentList(c echo.Context) error {
 	// 非空检查
-	rawArticleId := c.QueryParam("articleId")
+	rawArticleId := c.QueryParam("article_id")
 	rawPage := c.QueryParam("page")
 	rawPageSize := c.QueryParam("pageSize")
 	if rawPage != "" {
@@ -226,7 +226,7 @@ func CommentList(c echo.Context) error {
 }
 
 func GetArticleCommentCount(c echo.Context) error {
-	rawArticleId := c.QueryParam("articleId")
+	rawArticleId := c.QueryParam("article_id")
 	articleId, err := strconv.Atoi(rawArticleId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
@@ -256,7 +256,7 @@ func GetArticleCommentCount(c echo.Context) error {
 func GetUserCommentCount(c echo.Context) error {
 	var commentNum int64
 	var err error
-	rawUserId := c.QueryParam("userId")
+	rawUserId := c.QueryParam("user_id")
 	// 若提供userId,则查询该用户,否则查询自身评论数
 	if rawUserId == "" {
 		claims := c.Get("claims").(util.JwtClaims)
