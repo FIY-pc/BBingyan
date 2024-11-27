@@ -223,6 +223,13 @@ func UserUpdate(c echo.Context) error {
 		user.Password = Password
 	}
 	if Nickname := c.FormValue("nickname"); Nickname != "" {
+		if len(Nickname) > config.Config.User.Nickname.Maxlength {
+			return c.JSON(http.StatusBadRequest, params.CommonErrorResp{
+				Code:  http.StatusBadRequest,
+				Msg:   "Nickname is too long",
+				Error: "",
+			})
+		}
 		user.Nickname = Nickname
 	}
 
@@ -243,7 +250,29 @@ func UserUpdate(c echo.Context) error {
 
 func UserDelete(c echo.Context) error {
 	email := c.FormValue("email")
-	err := model.DeleteUserByEmail(email)
+	claims := c.Get("claims").(util.JwtClaims)
+	userId := claims.UserId
+	permission := claims.Permission
+	resultUser, err := model.GetUserByID(userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Get user failed",
+			Error: err.Error(),
+		})
+	}
+	// 要么超级管理员删号，要么自己注销
+	// TODO: 如果是用户自行注销，后续需要一个再次确认环节，需要正确验证码才能成功删号
+	if permission < util.PermissionAdmin {
+		if resultUser.Email != email {
+			return c.JSON(http.StatusUnauthorized, params.CommonErrorResp{
+				Code:  http.StatusUnauthorized,
+				Msg:   "You are not allowed to delete this user",
+				Error: "",
+			})
+		}
+	}
+	err = model.DeleteUserByEmail(email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
 			Code:  http.StatusInternalServerError,
@@ -255,5 +284,23 @@ func UserDelete(c echo.Context) error {
 		Code: http.StatusOK,
 		Msg:  "User delete success",
 		Data: nil,
+	})
+}
+
+// GetUserByNickName 根据昵称获取用户信息,主要为@功能提供支持
+func GetUserByNickName(c echo.Context) error {
+	nickname := c.QueryParam("nickname")
+	user, err := model.GetUserByNickname(nickname)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, params.CommonErrorResp{
+			Code:  http.StatusInternalServerError,
+			Msg:   "Get user failed",
+			Error: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, params.Common200Resp{
+		Code: http.StatusOK,
+		Msg:  "User info success",
+		Data: user,
 	})
 }

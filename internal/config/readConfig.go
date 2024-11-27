@@ -60,8 +60,9 @@ type UserConfig struct {
 }
 
 type NicknameConfig struct {
-	RandMin int `json:"rand_min"`
-	RandMax int `json:"rand_max"`
+	RandMin   int `json:"rand_min"`
+	RandMax   int `json:"rand_max"`
+	Maxlength int `json:"max_length"`
 }
 
 type AdminConfig struct {

@@ -10,7 +10,7 @@ import (
 type User struct {
 	ID         uint      `json:"id" gorm:"primaryKey"`
 	Email      string    `json:"email" gorm:"unique"`
-	Nickname   string    `json:"nickname"`
+	Nickname   string    `json:"nickname" gorm:"unique"`
 	Password   string    `json:"password"`
 	Permission int       `json:"permission" gorm:"default:1"`
 	CreatedAt  time.Time `json:"created_at"`
@@ -70,6 +70,14 @@ func GetUserByEmail(email string) (*User, error) {
 func GetUserByID(id uint) (*User, error) {
 	var user User
 	if err := postgresDb.Where("id", id).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func GetUserByNickname(nickname string) (*User, error) {
+	var user User
+	if err := postgresDb.Where("nickname", nickname).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

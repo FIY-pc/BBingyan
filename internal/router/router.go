@@ -18,7 +18,6 @@ func InitRouter(e *echo.Echo) {
 
 	// User
 	e.GET("/users", controller.UserInfo)
-	e.POST("/users/login", controller.Login)
 	e.PUT("/users", controller.UserUpdate)
 	e.DELETE("/users", controller.UserDelete)
 	e.GET("/users/commentCount", controller.GetUserCommentCount)
