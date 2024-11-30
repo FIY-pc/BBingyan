@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/FIY-pc/BBingyan/internal/config"
+	"github.com/labstack/gommon/log"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"time"
@@ -25,7 +26,7 @@ type User struct {
 
 func InitUser(DB *gorm.DB) {
 	if err := DB.AutoMigrate(&User{}); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 }
 

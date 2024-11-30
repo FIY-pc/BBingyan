@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"github.com/labstack/gommon/log"
 	"gorm.io/gorm"
 	"time"
 )
@@ -37,13 +38,13 @@ type Comment struct {
 
 func InitArticle(db *gorm.DB) {
 	if err := db.AutoMigrate(&Article{}); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	if err := db.AutoMigrate(&Content{}); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	if err := db.AutoMigrate(&Comment{}); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 }
 

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/labstack/gommon/log"
 	"gorm.io/gorm"
 	"sort"
 )
@@ -29,10 +30,10 @@ const (
 
 func InitNode(DB *gorm.DB) {
 	if err := DB.AutoMigrate(&Node{}); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 	if err := DB.AutoMigrate(&UserNode{}); err != nil {
-		panic(err)
+		log.Error(err)
 	}
 }
 
