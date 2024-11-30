@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/FIY-pc/BBingyan/internal/controller/params"
 	"github.com/FIY-pc/BBingyan/internal/model"
+	"github.com/FIY-pc/BBingyan/internal/model/modelParams"
 	"github.com/FIY-pc/BBingyan/internal/util"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/context"
@@ -25,13 +26,13 @@ func ListFollower(c echo.Context) error {
 	}
 	// 获取总follower数
 	strUserId := strconv.Itoa(int(userId))
-	cardCmd := rdb.ZCard(ctx, params.FollowKey(strUserId))
+	cardCmd := rdb.ZCard(ctx, modelParams.FollowKey(strUserId))
 	count, err := cardCmd.Result()
 	if err != nil {
 		return params.CommonErrorGenerate(c, http.StatusBadRequest, "List follower failed", err)
 	}
 	// 从redis获取需要查询的id列表,分页已通过redis的zset类型处理,默认按照id升序排序
-	cmd := rdb.ZRange(ctx, params.FollowKey(strUserId), int64((page-1)*pageSize), int64(page*pageSize))
+	cmd := rdb.ZRange(ctx, modelParams.FollowKey(strUserId), int64((page-1)*pageSize), int64(page*pageSize))
 	if cmd.Err() != nil {
 		return params.CommonErrorGenerate(c, http.StatusBadRequest, "List follower failed", err)
 	}

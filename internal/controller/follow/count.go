@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/FIY-pc/BBingyan/internal/controller/params"
+	"github.com/FIY-pc/BBingyan/internal/model/modelParams"
 	"github.com/FIY-pc/BBingyan/internal/util"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/context"
@@ -22,7 +23,7 @@ func GetFollowerNum(c echo.Context) error {
 		return err
 	}
 	// 查询
-	cmd := rdb.ZCard(ctx, params.FollowKey(strconv.Itoa(int(userId))))
+	cmd := rdb.ZCard(ctx, modelParams.FollowKey(strconv.Itoa(int(userId))))
 	if cmd.Err() != nil {
 		return params.CommonErrorGenerate(c, http.StatusBadRequest, "get follower num failed", nil)
 	}

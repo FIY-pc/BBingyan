@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"github.com/FIY-pc/BBingyan/internal/controller/params"
+	"github.com/FIY-pc/BBingyan/internal/model/modelParams"
 	"github.com/FIY-pc/BBingyan/internal/util"
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
@@ -39,7 +40,7 @@ func Follow(c echo.Context) error {
 		return params.CommonErrorGenerate(c, http.StatusBadRequest, "you had followed this user already", nil)
 	}
 	// 将关注者id添加到被关注者id的follow sort set中
-	addCmd := rdb.ZAdd(ctx, params.FollowKey(targetId), redis.Z{
+	addCmd := rdb.ZAdd(ctx, modelParams.FollowKey(targetId), redis.Z{
 		Member: userId,
 		Score:  score(userId),
 	})
@@ -72,7 +73,7 @@ func Unfollow(c echo.Context) error {
 		return params.CommonErrorGenerate(c, http.StatusBadRequest, "already cancel", nil)
 	}
 	// 取消关注
-	remCmd := rdb.ZRem(ctx, params.FollowKey(targetId), userId)
+	remCmd := rdb.ZRem(ctx, modelParams.FollowKey(targetId), userId)
 	if remCmd.Err() != nil {
 		return params.CommonErrorGenerate(c, http.StatusBadRequest, "cancel follow failed", nil)
 	}
