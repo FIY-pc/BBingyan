@@ -2,75 +2,13 @@
   "/token": {
     "GET": "public"
   },
-  "/users": {
-    "Get": "user",
-    "POST": "user",
-    "PUT": "user",
-    "DELETE": "user"
-  },
-  "/users/commentCount": {
-    "GET": "user"
-  },
   "/captcha": {
     "GET": "public"
   },
   "/users/register":{
     "POST": "public"
   },
-  "/articles":{
-    "GET": "user",
-    "POST": "user",
-    "PUT": "user",
-    "DELETE": "user"
-  },
-  "/article/commentsCount": {
-    "GET": "user"
-  },
-  "/articles/like": {
-    "POST": "user"
-  },
-  "/articles/unlike": {
-    "DELETE": "user"
-  },
-  "/articles/likeNum": {
-    "GET": "user"
-  },
-  "/follows":{
-    "POST": "user",
-    "DELETE": "user"
-  },
-  "/follows/mynum": {
-    "GET": "user"
-  },
-  "/followers/num":{
-    "GET": "user"
-  },
-  "/follows/isfollowed":{
-    "GET": "user"
-  },
-  "/followers/":{
-    "GET": "user"
-  },
-  "/comments":{
-    "GET": "user",
-    "POST": "user",
-    "DELETE": "user"
-  },
-  "/comments/pages":{
-    "GET": "user"
-  },
   "/nodes": {
-    "GET": "user",
-    "POST": "user",
-    "PUT": "user",
     "DELETE": "admin"
-  },
-  "/nodes/articles":{
-    "GET": "user"
-  },
-  "/nodes/admins": {
-    "GET": "user",
-    "POST": "user",
-    "DELETE": "user"
   }
 }

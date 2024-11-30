@@ -94,7 +94,7 @@ func JWTAuthMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-// PermissionMiddleware 权限级别验证
+// PermissionMiddleware 权限级别验证,默认从PathLevel读取特殊路由权限配置
 func PermissionMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
