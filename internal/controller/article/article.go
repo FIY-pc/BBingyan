@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/FIY-pc/BBingyan/internal/controller/params"
+	"github.com/FIY-pc/BBingyan/internal/controller/permission"
 	"github.com/FIY-pc/BBingyan/internal/model"
-	"github.com/FIY-pc/BBingyan/internal/util"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -65,7 +65,7 @@ func ArticleUpdate(c echo.Context) error {
 		return params.CommonErrorGenerate(c, http.StatusInternalServerError, "article update failed", err)
 	}
 	// 检查权限
-	if !articlePermissionCheck(c, articleId) {
+	if !permission.ArticlePermissionCheck(c, articleId) {
 		return params.CommonErrorGenerate(c, http.StatusUnauthorized, "permission check failed", err)
 	}
 
@@ -95,7 +95,7 @@ func ArticleDelete(c echo.Context) error {
 		return err
 	}
 	// 权限检查
-	if !articlePermissionCheck(c, articleId) {
+	if !permission.ArticlePermissionCheck(c, articleId) {
 		return params.CommonErrorGenerate(c, http.StatusUnauthorized, "permission check failed", err)
 	}
 	// 删除文章
@@ -108,21 +108,4 @@ func ArticleDelete(c echo.Context) error {
 		Msg:  "Delete article success",
 		Data: nil,
 	})
-}
-
-// articlePermissionCheck 检查是否有权限操作本文章,仅管理员或文章作者有权操作
-func articlePermissionCheck(c echo.Context, articleId uint) bool {
-	claims := c.Get("claims").(util.JwtClaims)
-	userId := claims.UserId
-	Permission := claims.Permission
-	if Permission < util.PermissionAdmin {
-		article, err := model.GetArticleByID(articleId)
-		if err != nil {
-			return false
-		}
-		if article.UserID != userId {
-			return false
-		}
-	}
-	return true
 }
