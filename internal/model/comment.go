@@ -52,7 +52,7 @@ func GetArticleCommentCount(articleId uint) (int64, error) {
 		return 0, errors.New("DB is nil")
 	}
 	var commentNum int64
-	postgresDb.Where("article_id", articleId).Count(&commentNum)
+	postgresDb.Model(Comment{}).Where("article_id", articleId).Count(&commentNum)
 	return commentNum, nil
 }
 
@@ -61,6 +61,6 @@ func GetUserCommentCount(userId uint) (int64, error) {
 		return 0, errors.New("DB is nil")
 	}
 	var commentNum int64
-	postgresDb.Where("user_id", userId).Count(&commentNum)
+	postgresDb.Model(Comment{}).Where("user_id", userId).Count(&commentNum)
 	return commentNum, nil
 }

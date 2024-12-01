@@ -36,7 +36,8 @@
     },
     "nickname": {
       "rand_min": 8,
-      "rand_max": 16
+      "rand_max": 16,
+      "max_length": 20
     }
   }
 }

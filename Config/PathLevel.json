@@ -1,59 +1,14 @@
 {
   "/token": {
-    "GET": 0
-  },
-  "/users": {
-    "Get": 1,
-    "POST": 1,
-    "PUT": 1,
-    "DELETE": 1
-  },
-  "/users/commentCount": {
-    "GET": 1
+    "GET": "public"
   },
   "/captcha": {
-    "GET": 0
+    "GET": "public"
   },
   "/users/register":{
-    "POST": 0
+    "POST": "public"
   },
-  "/articles":{
-    "GET": 1,
-    "POST": 1,
-    "PUT": 1,
-    "DELETE": 1
-  },
-  "/article/commentsCount": {
-    "GET": 1
-  },
-  "/articles/like": {
-    "POST": 1
-  },
-  "/articles/unlike": {
-    "DELETE": 1
-  },
-  "/articles/likeNum": {
-    "GET": 1
-  },
-  "/follows":{
-    "POST": 1,
-    "DELETE": 1
-  },
-  "/follows/mynum": {
-    "GET": 1
-  },
-  "/follows/num":{
-    "GET": 1
-  },
-  "/follows/isfollow":{
-    "GET": 1
-  },
-  "/comments":{
-    "GET": 1,
-    "POST": 1,
-    "DELETE": 1
-  },
-  "/comments/pages":{
-    "GET": 1
+  "/nodes": {
+    "DELETE": "admin"
   }
 }

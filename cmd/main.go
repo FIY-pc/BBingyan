@@ -14,6 +14,8 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
+	util.InitPathLevelJsonParser()
 	config.InitConfig()
 	model.InitPostgres()
 	util.InitRedis()
