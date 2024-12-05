@@ -8,14 +8,13 @@ import (
 )
 
 func loadConfig() {
-	configName := os.Getenv("Config_NAME")
+	env := os.Getenv("ENV")
 	viper.AddConfigPath("./Config")
-	if configName != "" {
-		viper.SetConfigName(configName)
+	if env != "" {
+		viper.SetConfigName(env)
 	} else {
 		viper.SetConfigName("default")
 	}
-
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
 	}
