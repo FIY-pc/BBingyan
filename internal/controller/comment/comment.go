@@ -61,7 +61,7 @@ func CommentDelete(c echo.Context) error {
 		}
 	}
 	// 管理员能删所有人的评论
-	if permission == util.PermissionUser {
+	if permission == util.PermissionAdmin {
 		err = model.DeleteCommentByID(uint(commentId))
 		if err != nil {
 			return params.CommonErrorGenerate(c, http.StatusInternalServerError, "delete comment failed", err)

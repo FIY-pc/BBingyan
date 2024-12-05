@@ -69,28 +69,26 @@ func ParseToken(tokenString string) (*JwtClaims, error) {
 }
 
 // JWTAuthMiddleware 用于鉴权，包含token有效性验证和权限级别验证
-func JWTAuthMiddleware() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			// 跳过不需要鉴权的路径
-			if Skipper(c) {
-				return next(c)
-			}
-			// 从请求中获取Authorization
-			authHeader := c.Request().Header.Get("Authorization")
-			if authHeader == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Authorization header missing")
-			}
-			// 解析并验证JWT令牌
-			claims, err := ParseToken(authHeader)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
-			}
-			// 将解析后的claims存入上下文，供后续处理器使用
-			c.Set("claims", claims)
-			// 检查权限等级
-			return PermissionMiddleware()(next)(c)
+func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// 跳过不需要鉴权的路径
+		if Skipper(c) {
+			return next(c)
 		}
+		// 从请求中获取Authorization
+		authHeader := c.Request().Header.Get("Authorization")
+		if authHeader == "" {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Authorization header missing")
+		}
+		// 解析并验证JWT令牌
+		claims, err := ParseToken(authHeader)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+		}
+		// 将解析后的claims存入上下文，供后续处理器使用
+		c.Set("claims", claims)
+		// 检查权限等级
+		return PermissionMiddleware()(next)(c)
 	}
 }
 
