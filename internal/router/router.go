@@ -7,12 +7,15 @@ import (
 	likecontroller "github.com/FIY-pc/BBingyan/internal/controller/like"
 	nodecontroller "github.com/FIY-pc/BBingyan/internal/controller/node"
 	usercontroller "github.com/FIY-pc/BBingyan/internal/controller/user"
+	"github.com/FIY-pc/BBingyan/internal/middleware"
 	"github.com/FIY-pc/BBingyan/internal/util"
 	"github.com/labstack/echo/v4"
 )
 
 func InitRouter(e *echo.Echo) {
-	e.Use(util.JWTAuthMiddleware())
+	// 中间件
+	e.Use(util.JWTAuthMiddleware)
+	e.Use(middleware.TraceMiddleware)
 	e.GET("/", func(c echo.Context) error {
 		return c.String(200, "Hello, BBingyan!")
 	})
