@@ -7,15 +7,31 @@ import (
 	"gorm.io/gorm"
 )
 
-var postgresDb *gorm.DB
+var PostgresDb *gorm.DB
 
-func InitPostgres() {
+func NewPostgres() {
 	var err error
-	postgresDb, err = gorm.Open(postgres.Open(config.Config.Postgres.Dsn), &gorm.Config{})
+	PostgresDb, err = gorm.Open(postgres.Open(config.Configs.Postgres.Dsn), &gorm.Config{})
 	if err != nil {
-		log.Error(err)
+		log.Fatal(err)
+		panic(err)
 	}
-	InitUser(postgresDb)
-	InitNode(postgresDb)
-	InitArticle(postgresDb)
+	// migrate user
+	if err = PostgresDb.AutoMigrate(&User{}); err != nil {
+		log.Fatal(err)
+	}
+	// migrate post related
+	if err = PostgresDb.AutoMigrate(&Post{}); err != nil {
+		log.Fatal(err)
+	}
+	if err = PostgresDb.AutoMigrate(&Content{}); err != nil {
+		log.Fatal(err)
+	}
+	if err = PostgresDb.AutoMigrate(&Comment{}); err != nil {
+		log.Fatal(err)
+	}
+	// migrate post and user related
+	if err = PostgresDb.AutoMigrate(&Node{}); err != nil {
+		log.Fatal(err)
+	}
 }

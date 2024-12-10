@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>BBingyan 验证码</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+            background-color: #f0f8ff; /* 更柔和的背景色 */
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #ffffff; /* 白色背景 */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+        }
+        h2 {
+            color: #4a4a4a;
+            text-align: center;
+        }
+        p {
+            margin: 10px 0; /* 增加上下间距 */
+            line-height: 1.5; /* 行高 */
+        }
+        .captcha {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e47426; /* 验证码颜色 */
+            text-align: center;
+            padding: 10px;
+            border: 2px dashed #e47426; /* 虚线边框 */
+            border-radius: 5px; /* 圆角 */
+            display: inline-block; /* 使其适应内容 */
+            margin: 20px 0; /* 增加上下间距 */
+        }
+        footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>验证码</h2>
+    <p>您的验证码是：</p>
+    <div class="captcha">{{.}}</div>
+    <p>请在5分钟内使用该验证码。</p>
+    <p>谢谢！</p>
+</div>
+<footer>
+    本邮件由 BBingyan 自动发送，请勿回复。
+</footer>
+</body>
+</html>
