@@ -1,0 +1,495 @@
+openapi: 3.1.0
+info:
+  title: BBingyan API
+  version: 1.0.0
+  description: API documentation for BBingyan project
+
+servers:
+  - url: http://localhost:8080/api
+
+paths:
+  /auth/login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDTO'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /auth/captcha:
+    post:
+      summary: Send captcha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Captcha sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /auth/register:
+    post:
+      summary: User registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDTO'
+      responses:
+        '201':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /users:
+    get:
+      summary: Get user by query parameters
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: string
+        - name: nickname
+          in: query
+          schema:
+            type: string
+        - name: email
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /users/{id}/comments:
+    get:
+      summary: Get comments by user ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comments found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /users/{id}:
+    put:
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateDTO'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    delete:
+      summary: Delete user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /posts:
+    post:
+      summary: Create post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostDTO'
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /posts/{id}:
+    put:
+      summary: Update post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostDTO'
+      responses:
+        '200':
+          description: Post updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    delete:
+      summary: Delete post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /posts/info/{id}:
+    get:
+      summary: Get post info
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post info retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /posts/content/{id}:
+    get:
+      summary: Get post content
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post content retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /posts/{id}/comments:
+    get:
+      summary: Get comments by post ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comments found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /nodes:
+    post:
+      summary: Create node
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeDTO'
+      responses:
+        '201':
+          description: Node created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /nodes/{id}:
+    get:
+      summary: Get node by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Node found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    put:
+      summary: Update node
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeDTO'
+      responses:
+        '200':
+          description: Node updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    delete:
+      summary: Delete node
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Node deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /comments:
+    post:
+      summary: Create comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentDTO'
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /comments/{id}:
+    get:
+      summary: Get comment by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comment found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    delete:
+      summary: Delete comment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comment deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /follows:
+    post:
+      summary: Follow user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetUID:
+                  type: string
+      responses:
+        '200':
+          description: Followed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    delete:
+      summary: Unfollow user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetUID:
+                  type: string
+      responses:
+        '200':
+          description: Unfollowed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+components:
+  schemas:
+    LoginDTO:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        nickname:
+          type: string
+        password:
+          type: string
+          minLength: 8
+          maxLength: 50
+    RegisterDTO:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        nickname:
+          type: string
+        password:
+          type: string
+          minLength: 6
+          maxLength: 20
+        captcha:
+          type: string
+    UserCreateDTO:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        nickname:
+          type: string
+        password:
+          type: string
+          minLength: 8
+          maxLength: 50
+    UserUpdateDTO:
+      type: object
+      properties:
+        uid:
+          type: integer
+        email:
+          type: string
+          format: email
+        nickname:
+          type: string
+        password:
+          type: string
+    CreatePostDTO:
+      type: object
+      properties:
+        title:
+          type: string
+        authorID:
+          type: integer
+        nodeID:
+          type: integer
+        text:
+          type: string
+    UpdatePostDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        text:
+          type: string
+    NodeDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        intro:
+          type: string
+        avatar:
+          type: string
+    CommentDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        userID:
+          type: integer
+        postID:
+          type: integer
+        text:
+          type: string
+    Response:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object

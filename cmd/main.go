@@ -1,29 +1,24 @@
 package main
 
 import (
-	"fmt"
 	"github.com/FIY-pc/BBingyan/internal/config"
 	"github.com/FIY-pc/BBingyan/internal/model"
 	"github.com/FIY-pc/BBingyan/internal/router"
-	"github.com/FIY-pc/BBingyan/internal/util"
-	"github.com/FIY-pc/BBingyan/internal/util/logger"
+	"github.com/FIY-pc/BBingyan/internal/service"
+	"github.com/FIY-pc/BBingyan/internal/utils/logger"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
 )
 
 func main() {
 	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
 
-	util.InitPathLevelJsonParser()
-	config.InitConfig()
-	model.InitPostgres()
-	util.InitRedis()
-	model.InitSuperAdmin()
-	logger.InitLogger()
+	config.LoadConfig()
+	logger.NewLogger()
+	model.NewPostgres()
+	model.NewRedisClient()
+	service.InitAdmin()
 	router.InitRouter(e)
 
-	startURL := fmt.Sprint(config.Config.Server.Host, ":", config.Config.Server.Port)
-	e.Logger.Fatal(e.Start(startURL))
+	log.Fatal(e.Start(config.Configs.Server.Host + ":" + config.Configs.Server.Port))
 }

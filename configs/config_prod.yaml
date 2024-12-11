@@ -1,0 +1,40 @@
+server:
+  host: "localhost"
+  port: "8080"
+  env: "dev"
+
+postgres:
+  dsn: ""
+
+user:
+  initAdmin:
+    email: "admin@example.com"
+    password: "securepassword"
+
+captcha:
+  smtpUser: ""
+  smtpNickname: "BBingYan"
+  smtpPassword: ""
+  smtpHost: "smtp.qq.com"
+  smtpPort: "587"
+  expire: "15m"
+  interval: "1m"
+
+jwt:
+  secret: "your_jwt_secret"
+  expiration: "24h"
+
+log:
+  logfile: "./appLog.log"
+  maxsize: 10
+  maxAge: 30
+  compress: false
+  localTime: true
+
+redis:
+  addr: ""
+  password: ""
+  db: 0
+
+bcrypt:
+  cost: 10
