@@ -5,9 +5,10 @@ import (
 	"errors"
 	"github.com/FIY-pc/BBingyan/internal/config"
 	"github.com/FIY-pc/BBingyan/internal/dto"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"github.com/FIY-pc/BBingyan/internal/model"
 	"github.com/FIY-pc/BBingyan/internal/utils"
-	"github.com/FIY-pc/BBingyan/internal/utils/logger"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/context"
@@ -91,7 +92,7 @@ func Register(c echo.Context, dto dto.RegisterDTO) error {
 		logger.Log.Warn(c, HashPasswordError)
 		return err
 	}
-	result := model.PostgresDb.Model(&model.User{}).Create(&user)
+	result := infrastructure.PostgresDb.Model(&model.User{}).Create(&user)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -140,7 +141,7 @@ func checkInterval(ctx context.Context, email string) error {
 	if err != nil {
 		return err
 	}
-	TTL, err := model.Rdb.TTL(ctx, email).Result()
+	TTL, err := infrastructure.Rdb.TTL(ctx, email).Result()
 	if err != nil {
 		return err
 	}
@@ -155,19 +156,19 @@ func addCaptcha(ctx context.Context, email, captcha string) error {
 	if err != nil {
 		return err
 	}
-	return model.Rdb.Set(ctx, email, captcha, TTL).Err()
+	return infrastructure.Rdb.Set(ctx, email, captcha, TTL).Err()
 }
 
 func verifyCaptcha(email, captcha string) bool {
 	key := email + ":" + captcha
-	result, err := model.Rdb.Get(context.Background(), key).Result()
+	result, err := infrastructure.Rdb.Get(context.Background(), key).Result()
 	if err != nil {
 		return false
 	}
 	if result != captcha {
 		return false
 	}
-	_ = model.Rdb.Del(context.Background(), key)
+	_ = infrastructure.Rdb.Del(context.Background(), key)
 	return true
 }
 

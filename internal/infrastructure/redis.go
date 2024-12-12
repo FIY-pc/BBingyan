@@ -1,8 +1,8 @@
-package model
+package infrastructure
 
 import (
 	"github.com/FIY-pc/BBingyan/internal/config"
-	"github.com/FIY-pc/BBingyan/internal/utils/logger"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/net/context"
 	"time"

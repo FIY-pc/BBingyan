@@ -4,9 +4,10 @@ import (
 	"errors"
 	"github.com/FIY-pc/BBingyan/internal/config"
 	"github.com/FIY-pc/BBingyan/internal/dto"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"github.com/FIY-pc/BBingyan/internal/model"
 	"github.com/FIY-pc/BBingyan/internal/utils"
-	"github.com/FIY-pc/BBingyan/internal/utils/logger"
 	"gorm.io/gorm"
 )
 
@@ -22,7 +23,7 @@ const (
 // InitAdmin 初始化管理员用户
 func InitAdmin() {
 	var existingAdmin model.User
-	result := model.PostgresDb.Model(&model.User{}).Where("uid = ?", 0).First(&existingAdmin)
+	result := infrastructure.PostgresDb.Model(&model.User{}).Where("uid = ?", 0).First(&existingAdmin)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		err := createAdminUser()
@@ -52,7 +53,7 @@ func createAdminUser() error {
 		IsAdmin:  true,
 	}
 
-	if err := model.PostgresDb.Model(&model.User{}).Create(&adminUser).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.User{}).Create(&adminUser).Error; err != nil {
 		logger.Log.Warn(nil, ModelError, "error", err)
 		return err
 	}
@@ -75,7 +76,7 @@ func CreateUser(userDTO dto.UserCreateDTO) error {
 		Nickname: userDTO.Nickname,
 	}
 
-	result := model.PostgresDb.Model(&model.User{}).Create(&user)
+	result := infrastructure.PostgresDb.Model(&model.User{}).Create(&user)
 	if result.Error != nil {
 		logger.Log.Warn(nil, ModelError, "error", result.Error)
 		return result.Error
@@ -101,7 +102,7 @@ func UpdateUser(userDTO dto.UserUpdateDTO) error {
 		updates["password"] = hashPassword
 	}
 	// 更新用户信息
-	result := model.PostgresDb.Model(&model.User{}).Where("uid = ?", userDTO.UID).Updates(updates)
+	result := infrastructure.PostgresDb.Model(&model.User{}).Where("uid = ?", userDTO.UID).Updates(updates)
 	if result.Error != nil {
 		logger.Log.Warn(nil, ModelError, "UID", userDTO.UID, "error", result.Error)
 		return result.Error
@@ -113,7 +114,7 @@ func UpdateUser(userDTO dto.UserUpdateDTO) error {
 
 // DeleteUser 删除用户
 func DeleteUser(UID uint) error {
-	result := model.PostgresDb.Model(&model.User{}).Where("uid = ?", UID).Delete(&model.User{})
+	result := infrastructure.PostgresDb.Model(&model.User{}).Where("uid = ?", UID).Delete(&model.User{})
 	if result.Error != nil {
 		logger.Log.Warn(nil, ModelError, "UID", UID)
 		return result.Error
@@ -126,7 +127,7 @@ func DeleteUser(UID uint) error {
 // GetUserByNickname 根据昵称获取用户
 func GetUserByNickname(nickname string) (*model.User, error) {
 	var user model.User
-	result := model.PostgresDb.Model(&model.User{}).Where("nickname = ?", nickname).First(&user)
+	result := infrastructure.PostgresDb.Model(&model.User{}).Where("nickname = ?", nickname).First(&user)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		logger.Log.Warn(nil, NotFoundError, "nickname", nickname)
@@ -144,7 +145,7 @@ func GetUserByNickname(nickname string) (*model.User, error) {
 // GetUserByEmail 根据电子邮件获取用户
 func GetUserByEmail(email string) (*model.User, error) {
 	var user model.User
-	result := model.PostgresDb.Model(&model.User{}).Where("email = ?", email).First(&user)
+	result := infrastructure.PostgresDb.Model(&model.User{}).Where("email = ?", email).First(&user)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		logger.Log.Warn(nil, NotFoundError, "email", email)
@@ -162,7 +163,7 @@ func GetUserByEmail(email string) (*model.User, error) {
 // GetUserByID 根据用户 ID 获取用户
 func GetUserByID(uid uint) (*model.User, error) {
 	var user model.User
-	result := model.PostgresDb.Model(&model.User{}).Where("uid = ?", uid).First(&user)
+	result := infrastructure.PostgresDb.Model(&model.User{}).Where("uid = ?", uid).First(&user)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		logger.Log.Warn(nil, NotFoundError, "UID", uid)
