@@ -2,8 +2,9 @@ package service
 
 import (
 	"github.com/FIY-pc/BBingyan/internal/dto"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"github.com/FIY-pc/BBingyan/internal/model"
-	"github.com/FIY-pc/BBingyan/internal/utils/logger"
 )
 
 func CreateComment(commentDTO dto.CommentDTO) error {
@@ -12,7 +13,7 @@ func CreateComment(commentDTO dto.CommentDTO) error {
 		PostID: commentDTO.PostID,
 		Text:   commentDTO.Text,
 	}
-	if err := model.PostgresDb.Model(&model.Comment{}).Create(&comment).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Comment{}).Create(&comment).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "error", err)
 		return err
 	}
@@ -21,7 +22,7 @@ func CreateComment(commentDTO dto.CommentDTO) error {
 }
 
 func DeleteComment(commentID uint) error {
-	if err := model.PostgresDb.Model(&model.Comment{}).Where("id = ?", commentID).Delete(&model.Comment{}).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Comment{}).Where("id = ?", commentID).Delete(&model.Comment{}).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "error", err)
 		return err
 	}
@@ -32,7 +33,7 @@ func DeleteComment(commentID uint) error {
 func GetCommentByID(commentID uint) (dto.CommentDTO, error) {
 	var commentDTO dto.CommentDTO
 	var comment model.Comment
-	if err := model.PostgresDb.Model(&model.Comment{}).Where("id = ?", commentID).First(&comment).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Comment{}).Where("id = ?", commentID).First(&comment).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "error", err)
 		return commentDTO, err
 	}
@@ -48,7 +49,7 @@ func GetCommentByID(commentID uint) (dto.CommentDTO, error) {
 func GetCommentsByPostID(postID uint) ([]dto.CommentDTO, error) {
 	var commentDTOs []dto.CommentDTO
 	var comments []model.Comment
-	if err := model.PostgresDb.Model(&model.Comment{}).Where("post_id = ?", postID).Find(&comments).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Comment{}).Where("post_id = ?", postID).Find(&comments).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "error", err)
 		return commentDTOs, err
 	}
@@ -67,7 +68,7 @@ func GetCommentsByPostID(postID uint) ([]dto.CommentDTO, error) {
 func GetCommentsByUserID(userID uint) ([]dto.CommentDTO, error) {
 	var commentDTOs []dto.CommentDTO
 	var comments []model.Comment
-	if err := model.PostgresDb.Model(&model.Comment{}).Where("user_id = ?", userID).Find(&comments).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Comment{}).Where("user_id = ?", userID).Find(&comments).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "error", err)
 		return commentDTOs, err
 	}

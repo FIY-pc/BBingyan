@@ -4,8 +4,8 @@ import (
 	"github.com/FIY-pc/BBingyan/internal/controller/context"
 	"github.com/FIY-pc/BBingyan/internal/controller/params"
 	"github.com/FIY-pc/BBingyan/internal/dto"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"github.com/FIY-pc/BBingyan/internal/service"
-	"github.com/FIY-pc/BBingyan/internal/utils/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )

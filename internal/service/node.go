@@ -2,15 +2,16 @@ package service
 
 import (
 	"github.com/FIY-pc/BBingyan/internal/dto"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"github.com/FIY-pc/BBingyan/internal/model"
-	"github.com/FIY-pc/BBingyan/internal/utils/logger"
 )
 
 // GetNodeByID 获取节点
 func GetNodeByID(nodeId uint) (dto.NodeDTO, error) {
 	var nodeDTO dto.NodeDTO
 	node := model.Node{}
-	if err := model.PostgresDb.Model(&model.Node{}).Where("id = ?", nodeId).First(&node).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Node{}).Where("id = ?", nodeId).First(&node).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "nodeID", nodeId, "error", err)
 		return nodeDTO, err
 	}
@@ -36,7 +37,7 @@ func CreateNode(nodeDTO dto.NodeDTO) error {
 		creates.Avatar = nodeDTO.Avatar
 	}
 	// 创建节点
-	if err := model.PostgresDb.Model(&model.Node{}).Create(&creates).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Node{}).Create(&creates).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "nodeID", nodeDTO.ID, "error", err)
 		return err
 	}
@@ -55,7 +56,7 @@ func UpdateNode(nodeDTO dto.NodeDTO) error {
 	if nodeDTO.Avatar != "" {
 		update["avatar"] = nodeDTO.Avatar
 	}
-	if err := model.PostgresDb.Model(&model.Node{}).Where("id = ?", nodeDTO.ID).Updates(&update).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Node{}).Where("id = ?", nodeDTO.ID).Updates(&update).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "nodeID", nodeDTO.ID, "error", err)
 		return err
 	}
@@ -66,7 +67,7 @@ func UpdateNode(nodeDTO dto.NodeDTO) error {
 // SortDeleteNode 软删除节点
 func SortDeleteNode(nodeId uint) error {
 	// 软删除节点
-	if err := model.PostgresDb.Model(&model.Node{}).Where("id = ?", nodeId).Delete(&model.Node{}).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Node{}).Where("id = ?", nodeId).Delete(&model.Node{}).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "nodeID", nodeId, "error", err)
 		return err
 	}
@@ -77,7 +78,7 @@ func SortDeleteNode(nodeId uint) error {
 // HardDeleteNode 硬删除节点
 func HardDeleteNode(nodeId uint) error {
 	// 硬删除节点
-	if err := model.PostgresDb.Model(&model.Node{}).Unscoped().Where("id = ?", nodeId).Delete(&model.Node{}).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Node{}).Unscoped().Where("id = ?", nodeId).Delete(&model.Node{}).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "nodeID", nodeId, "error", err)
 		return err
 	}
@@ -87,7 +88,7 @@ func HardDeleteNode(nodeId uint) error {
 
 // DeletePostUnderNode 删除节点下的所有帖子
 func DeletePostUnderNode(nodeId uint) error {
-	if err := model.PostgresDb.Model(&model.Post{}).Where("node_id = ?", nodeId).Delete(&model.Post{}).Error; err != nil {
+	if err := infrastructure.PostgresDb.Model(&model.Post{}).Where("node_id = ?", nodeId).Delete(&model.Post{}).Error; err != nil {
 		logger.Log.Error(nil, ModelError, "nodeID", nodeId, "error", err)
 		return err
 	}

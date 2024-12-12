@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/FIY-pc/BBingyan/internal/model"
-	"github.com/FIY-pc/BBingyan/internal/utils/logger"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"github.com/redis/go-redis/v9"
 	Rcontext "golang.org/x/net/context"
 	"strconv"
@@ -18,7 +18,7 @@ func followKey(targetUID uint) string {
 
 func Follow(targetUID uint, followerUID uint) error {
 	ctx := Rcontext.Background()
-	model.Rdb.ZAdd(ctx, followKey(targetUID), redis.Z{
+	infrastructure.Rdb.ZAdd(ctx, followKey(targetUID), redis.Z{
 		Score:  score(followerUID),
 		Member: followerUID,
 	})
@@ -28,7 +28,7 @@ func Follow(targetUID uint, followerUID uint) error {
 
 func UnFollow(targetUID uint, followerUID uint) error {
 	ctx := Rcontext.Background()
-	model.Rdb.ZRem(ctx, followKey(targetUID), followerUID)
+	infrastructure.Rdb.ZRem(ctx, followKey(targetUID), followerUID)
 	logger.Log.Info(nil, "UnFollow success", "followerUID", followerUID, "targetUID", targetUID)
 	return nil
 }

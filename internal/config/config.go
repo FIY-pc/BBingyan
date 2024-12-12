@@ -3,14 +3,15 @@ package config
 import "time"
 
 type Config struct {
-	Server   *ServerConfig   `yaml:"server"`
-	Postgres *PostgresConfig `yaml:"postgres"`
-	User     *UserConfig     `yaml:"user"`
-	Captcha  *CaptchaConfig  `yaml:"captcha"`
-	JWT      *JWTConfig      `yaml:"jwt"`
-	Bcrypt   *BcryptConfig   `yaml:"bcrypt"`
-	Log      *LogConfig      `yaml:"log"`
-	Redis    *RedisConfig    `yaml:"redis"`
+	Server   *ServerConfig        `yaml:"server"`
+	Postgres *PostgresConfig      `yaml:"postgres"`
+	User     *UserConfig          `yaml:"user"`
+	Captcha  *CaptchaConfig       `yaml:"captcha"`
+	JWT      *JWTConfig           `yaml:"jwt"`
+	Bcrypt   *BcryptConfig        `yaml:"bcrypt"`
+	Log      *LogConfig           `yaml:"log"`
+	Redis    *RedisConfig         `yaml:"redis"`
+	ES       *ElasticsearchConfig `yaml:"elasticsearch"`
 }
 
 type ServerConfig struct {
@@ -63,4 +64,10 @@ type RedisConfig struct {
 
 type BcryptConfig struct {
 	Cost int `yaml:"cost"`
+}
+
+type ElasticsearchConfig struct {
+	Addresses []string `yaml:"addresses"`
+	Username  string   `yaml:"username"`
+	Password  string   `yaml:"password"`
 }
