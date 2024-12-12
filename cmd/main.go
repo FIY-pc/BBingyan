@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/FIY-pc/BBingyan/internal/config"
 	"github.com/FIY-pc/BBingyan/internal/infrastructure"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/es"
 	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"github.com/FIY-pc/BBingyan/internal/router"
 	"github.com/FIY-pc/BBingyan/internal/service"
@@ -17,6 +18,7 @@ func main() {
 	logger.NewLogger()
 	infrastructure.NewPostgres()
 	infrastructure.NewRedisClient()
+	es.NewElasticSearch()
 	service.InitAdmin()
 	router.InitRouter(e)
 

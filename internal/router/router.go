@@ -14,24 +14,25 @@ func InitRouter(e *echo.Echo) {
 	e.Use(echomiddleware.Recover())
 	e.Use(middleware.TraceMiddleware)
 	// route groups
-	AuthRouter(e)
-	UserRouter(e)
-	PostRouter(e)
-	NodeRouter(e)
-	FollowRouter(e)
-	CommentRouter(e)
+	authRouter(e)
+	userRouter(e)
+	postRouter(e)
+	nodeRouter(e)
+	followRouter(e)
+	commentRouter(e)
+	searchRouter(e)
 }
 
-// AuthRouter 认证路由
-func AuthRouter(e *echo.Echo) {
+// authRouter 认证路由
+func authRouter(e *echo.Echo) {
 	public := e.Group("/api/auth")
 	public.POST("/login", controller.Login)
 	public.POST("/captcha", controller.SendCaptcha)
 	public.POST("/register", controller.Register)
 }
 
-// UserRouter 用户路由
-func UserRouter(e *echo.Echo) {
+// userRouter 用户路由
+func userRouter(e *echo.Echo) {
 	userGroup := e.Group("/api/users")
 
 	// basic auth routes
@@ -51,8 +52,8 @@ func UserRouter(e *echo.Echo) {
 	admin.POST("/", controller.CreateUser)
 }
 
-// PostRouter 文章路由
-func PostRouter(e *echo.Echo) {
+// postRouter 文章路由
+func postRouter(e *echo.Echo) {
 	postGroup := e.Group("/api/posts")
 
 	// basic auth routes
@@ -70,7 +71,7 @@ func PostRouter(e *echo.Echo) {
 	owner.DELETE("/:id", controller.DeletePost)
 }
 
-func NodeRouter(e *echo.Echo) {
+func nodeRouter(e *echo.Echo) {
 	nodeGroup := e.Group("/api/nodes")
 
 	basic := nodeGroup.Group("")
@@ -86,7 +87,7 @@ func NodeRouter(e *echo.Echo) {
 	admin.DELETE("/posts", controller.DeletePostsUnderNode)
 }
 
-func FollowRouter(e *echo.Echo) {
+func followRouter(e *echo.Echo) {
 	followGroup := e.Group("/api/follows")
 
 	basic := followGroup.Group("")
@@ -95,7 +96,7 @@ func FollowRouter(e *echo.Echo) {
 	basic.DELETE("/", controller.UnFollow)
 }
 
-func CommentRouter(e *echo.Echo) {
+func commentRouter(e *echo.Echo) {
 	commentGroup := e.Group("/api/comments")
 
 	basic := commentGroup.Group("")
@@ -106,4 +107,12 @@ func CommentRouter(e *echo.Echo) {
 	owner := commentGroup.Group("")
 	owner.Use(middleware.OwnerAuth("comment"))
 	owner.DELETE("/:id", controller.DeleteComment)
+}
+
+func searchRouter(e *echo.Echo) {
+	searchGroup := e.Group("/api/search")
+
+	basic := searchGroup.Group("")
+	basic.Use(middleware.BasicAuth)
+	basic.GET("/post", controller.SearchPost)
 }
