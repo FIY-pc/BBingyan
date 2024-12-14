@@ -11,6 +11,16 @@ import (
 	"time"
 )
 
+// SubscribeWeeklyEmail 订阅周报
+func SubscribeWeeklyEmail(UID uint) error {
+	user := model.User{}
+	if err := infrastructure.PostgresDb.Where("uid = ?", UID).First(&user).Error; err != nil {
+		return err
+	}
+	user.SubscribeWeeklyEmail = true
+	return infrastructure.PostgresDb.Save(&user).Error
+}
+
 // SendWeeklyEmail 后台多协程发送周报邮件
 func SendWeeklyEmail(AdminID uint) {
 	go func() {

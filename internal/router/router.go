@@ -110,6 +110,7 @@ func searchRouter(e *echo.Echo) {
 func weeklyEmailRouter(e *echo.Echo) {
 	basic := e.Group("/api/weekly-email")
 	basic.Use(middleware.BasicAuth)
+	basic.POST("/subscribe", controller.SubscribeWeeklyEmail)
 
 	admin := basic.Group("")
 	admin.Use(middleware.AdminAuth)

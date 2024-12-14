@@ -52,3 +52,24 @@ func GetWeeklyEmailSendingHistory(c echo.Context) error {
 		},
 	})
 }
+
+// SubscribeWeeklyEmail 订阅周报
+func SubscribeWeeklyEmail(c echo.Context) error {
+	uid, err := context.GetUIDFromToken(c)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, params.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+	if err = service.SubscribeWeeklyEmail(uid); err != nil {
+		return c.JSON(http.StatusBadRequest, params.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, params.Response{
+		Success: true,
+		Message: "订阅成功",
+	})
+}
