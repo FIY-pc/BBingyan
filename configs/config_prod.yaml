@@ -11,14 +11,19 @@ user:
     email: "admin@example.com"
     password: "securepassword"
 
-captcha:
+smtp:
   smtpUser: ""
-  smtpNickname: "BBingYan"
+  smtpNickname: ""
   smtpPassword: ""
   smtpHost: "smtp.qq.com"
   smtpPort: "587"
-  expire: "15m"
-  interval: "1m"
+  captcha:
+    expire: "15m"
+    interval: "1m"
+  weeklyEmail:
+    routineNum: 10
+    timeOut: "10s"
+    rateLimit: "1m"
 
 jwt:
   secret: "your_jwt_secret"

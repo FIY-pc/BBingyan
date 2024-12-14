@@ -6,12 +6,12 @@ type Config struct {
 	Server   *ServerConfig        `yaml:"server"`
 	Postgres *PostgresConfig      `yaml:"postgres"`
 	User     *UserConfig          `yaml:"user"`
-	Captcha  *CaptchaConfig       `yaml:"captcha"`
 	JWT      *JWTConfig           `yaml:"jwt"`
 	Bcrypt   *BcryptConfig        `yaml:"bcrypt"`
 	Log      *LogConfig           `yaml:"log"`
 	Redis    *RedisConfig         `yaml:"redis"`
 	ES       *ElasticsearchConfig `yaml:"elasticsearch"`
+	Smtp     *SmtpConfig          `yaml:"smtp"`
 }
 
 type ServerConfig struct {
@@ -20,27 +20,8 @@ type ServerConfig struct {
 	Env  string `yaml:"env"`
 }
 
-type UserConfig struct {
-	InitAdmin *InitAdminConfig `yaml:"initAdmin"`
-}
-
 type PostgresConfig struct {
 	Dsn string `yaml:"dsn"`
-}
-
-type InitAdminConfig struct {
-	Email    string `yaml:"email"`
-	Password string `yaml:"password"`
-}
-
-type CaptchaConfig struct {
-	SmtpUser     string `yaml:"smtpUser"`
-	SmtpNickname string `yaml:"smtpNickname"`
-	SmtpPassword string `yaml:"smtpPassword"`
-	SmtpHost     string `yaml:"smtpHost"`
-	SmtpPort     string `yaml:"smtpPort"`
-	Expire       string `yaml:"expire"`
-	Interval     string `yaml:"interval"`
 }
 
 type JWTConfig struct {
