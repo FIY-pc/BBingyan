@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bytes"
 	"errors"
 	"github.com/FIY-pc/BBingyan/internal/config"
 	"github.com/FIY-pc/BBingyan/internal/dto"
@@ -12,13 +11,8 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/context"
-	"html/template"
 	"math/rand"
-	"net/smtp"
-	"os"
-	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -103,30 +97,22 @@ func Register(c echo.Context, dto dto.RegisterDTO) error {
 // SendCaptchaEmail 发送验证码邮件
 func SendCaptchaEmail(email string) error {
 	ctx := context.Background()
-	// 检查发送间隔
+	// check interval
 	err := checkInterval(ctx, email)
 	if err != nil {
 		logger.Log.Error(nil, err.Error())
 		return err
 	}
-	// 生成验证码
+	// send email
 	captcha := generateCaptcha()
-	// 发送邮件
 	subject := "BBingyan验证码"
-	body, err := generateEmailBody(captcha)
+	body, err := utils.GenerateEmailBody("captcha_email.html", captcha)
 	if err != nil {
 		logger.Log.Error(nil, err.Error())
 		return err
 	}
-	msg := []byte("To: " + email + "\r\n" +
-		"From: " + config.Configs.Captcha.SmtpUser + "\r\n" + "<" + config.Configs.Captcha.SmtpNickname + ">\r\n" +
-		"Subject: " + subject + "\r\n" +
-		"Content-Type: text/html; charset=\"UTF-8\"\r\n\r\n" +
-		body)
-
-	auth := smtp.PlainAuth("", config.Configs.Captcha.SmtpUser, config.Configs.Captcha.SmtpPassword, config.Configs.Captcha.SmtpHost)
-	_ = smtp.SendMail(config.Configs.Captcha.SmtpHost+":"+config.Configs.Captcha.SmtpPort, auth, config.Configs.Captcha.SmtpUser, []string{email}, msg)
-	// 将验证码存入redis
+	_ = utils.SendEmail(email, subject, body)
+	// add captcha to redis
 	err = addCaptcha(ctx, email, captcha)
 	if err != nil {
 		return err
@@ -136,8 +122,8 @@ func SendCaptchaEmail(email string) error {
 }
 
 func checkInterval(ctx context.Context, email string) error {
-	rawTTL, err := time.ParseDuration(config.Configs.Captcha.Expire)
-	interval, err := time.ParseDuration(config.Configs.Captcha.Interval)
+	rawTTL, err := time.ParseDuration(config.Configs.Smtp.Captcha.Expire)
+	interval, err := time.ParseDuration(config.Configs.Smtp.Captcha.Interval)
 	if err != nil {
 		return err
 	}
@@ -152,7 +138,7 @@ func checkInterval(ctx context.Context, email string) error {
 }
 
 func addCaptcha(ctx context.Context, email, captcha string) error {
-	TTL, err := time.ParseDuration(config.Configs.Captcha.Expire)
+	TTL, err := time.ParseDuration(config.Configs.Smtp.Captcha.Expire)
 	if err != nil {
 		return err
 	}
@@ -174,34 +160,4 @@ func verifyCaptcha(email, captcha string) bool {
 
 func generateCaptcha() (captcha string) {
 	return strconv.Itoa(100000 + rand.Intn(900000))
-}
-
-// generateEmailBody 从模板文件生成邮件内容
-func generateEmailBody(captcha string) (string, error) {
-	// 打开模板文件
-	tmpl, err := template.ParseFiles(getTemplatePath())
-	if err != nil {
-		logger.Log.Error(nil, err.Error())
-		return "", err
-	}
-
-	// 创建一个字符串缓冲区来存储生成的内容
-	var body bytes.Buffer
-	err = tmpl.Execute(&body, captcha)
-	if err != nil {
-		return "", err
-	}
-
-	return body.String(), nil
-}
-
-func getTemplatePath() string {
-	dir, err := os.Getwd()
-	if err != nil {
-		return ""
-	}
-	// 使用 filepath 包来处理路径
-	path := strings.Split(dir, "BBingyan")[0]
-	templatePath := filepath.Join(path, "BBingyan"+"/web/templates/captcha_email.html")
-	return templatePath
 }
