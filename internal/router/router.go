@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/FIY-pc/BBingyan/internal/config"
 	"github.com/FIY-pc/BBingyan/internal/controller"
 	"github.com/FIY-pc/BBingyan/internal/middleware"
 	"github.com/labstack/echo/v4"
@@ -21,6 +22,7 @@ func InitRouter(e *echo.Echo) {
 	followRouter(e)
 	commentRouter(e)
 	searchRouter(e)
+	weeklyEmailRouter(e)
 }
 
 // authRouter 认证路由
@@ -33,31 +35,27 @@ func authRouter(e *echo.Echo) {
 
 // userRouter 用户路由
 func userRouter(e *echo.Echo) {
-	userGroup := e.Group("/api/users")
-
 	// basic auth routes
-	basic := userGroup.Group("")
+	basic := e.Group("/api/users")
 	basic.Use(middleware.BasicAuth)
 	basic.GET("/", controller.GetUser)
 	basic.GET("/:id/comments", controller.GetCommentsByUserID)
 	// owner auth routes
-	owner := userGroup.Group("")
+	owner := basic.Group("")
 	owner.Use(middleware.OwnerAuth("user"))
 	owner.PUT("/:id", controller.UpdateUser)
 	owner.DELETE("/:id", controller.DeleteUser)
 
 	// admin auth routes
-	admin := userGroup.Group("")
+	admin := basic.Group("")
 	admin.Use(middleware.AdminAuth)
 	admin.POST("/", controller.CreateUser)
 }
 
 // postRouter 文章路由
 func postRouter(e *echo.Echo) {
-	postGroup := e.Group("/api/posts")
-
 	// basic auth routes
-	basic := postGroup.Group("")
+	basic := e.Group("/api/posts")
 	basic.Use(middleware.BasicAuth)
 	basic.GET("/", controller.GetPostWithContent)
 	basic.GET("/info/:id", controller.GetPostInfo)
@@ -65,21 +63,19 @@ func postRouter(e *echo.Echo) {
 	basic.GET("/:id/comments", controller.GetCommentsByPostID)
 	basic.POST("/", controller.CreatePost)
 	// owner auth routes
-	owner := postGroup.Group("")
+	owner := basic.Group("")
 	owner.Use(middleware.OwnerAuth("post"))
 	owner.PUT("/:id", controller.UpdatePost)
 	owner.DELETE("/:id", controller.DeletePost)
 }
 
 func nodeRouter(e *echo.Echo) {
-	nodeGroup := e.Group("/api/nodes")
-
-	basic := nodeGroup.Group("")
+	basic := e.Group("/api/nodes")
 	basic.Use(middleware.BasicAuth)
 	basic.GET("/:id", controller.GetNodeByID)
 	basic.POST("/", controller.CreateNode)
 
-	admin := nodeGroup.Group("")
+	admin := basic.Group("")
 	admin.Use(middleware.AdminAuth)
 	admin.PUT("/:id", controller.UpdateNode)
 	admin.DELETE("/:id/sort", controller.SortDeleteNode)
@@ -88,31 +84,35 @@ func nodeRouter(e *echo.Echo) {
 }
 
 func followRouter(e *echo.Echo) {
-	followGroup := e.Group("/api/follows")
-
-	basic := followGroup.Group("")
+	basic := e.Group("/api/follows")
 	basic.Use(middleware.BasicAuth)
 	basic.POST("/", controller.Follow)
 	basic.DELETE("/", controller.UnFollow)
 }
 
 func commentRouter(e *echo.Echo) {
-	commentGroup := e.Group("/api/comments")
-
-	basic := commentGroup.Group("")
+	basic := e.Group("/api/comments")
 	basic.Use(middleware.BasicAuth)
 	basic.POST("/", controller.CreateComment)
 	basic.GET("/:id", controller.GetCommentByID)
 
-	owner := commentGroup.Group("")
+	owner := basic.Group("")
 	owner.Use(middleware.OwnerAuth("comment"))
 	owner.DELETE("/:id", controller.DeleteComment)
 }
 
 func searchRouter(e *echo.Echo) {
-	searchGroup := e.Group("/api/search")
-
-	basic := searchGroup.Group("")
+	basic := e.Group("/api/search")
 	basic.Use(middleware.BasicAuth)
 	basic.GET("/post", controller.SearchPost)
+}
+
+func weeklyEmailRouter(e *echo.Echo) {
+	basic := e.Group("/api/weekly-email")
+	basic.Use(middleware.BasicAuth)
+
+	admin := basic.Group("")
+	admin.Use(middleware.AdminAuth)
+	admin.GET("/history", controller.GetWeeklyEmailSendingHistory)
+	admin.POST("/send", controller.SendWeeklyEmail, middleware.RateLimitMiddleware(config.Configs.Smtp.WeeklyEmail.RateLimit))
 }

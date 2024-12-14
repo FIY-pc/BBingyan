@@ -21,6 +21,10 @@ func NewPostgres() {
 	if err = PostgresDb.AutoMigrate(&model.User{}); err != nil {
 		log.Fatal(err)
 	}
+	// migrate user related
+	if err = PostgresDb.AutoMigrate(&model.WeeklyEmailSendingHistory{}); err != nil {
+		log.Fatal(err)
+	}
 	// migrate post related
 	if err = PostgresDb.AutoMigrate(&model.Post{}); err != nil {
 		log.Fatal(err)
