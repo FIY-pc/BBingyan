@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/es"
 	"github.com/fsnotify/fsnotify"
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/viper"
@@ -53,6 +54,9 @@ func startWatchingConfig() {
 		} else {
 			Configs = &newConfig
 			log.Info("Configuration updated: " + e.Name)
+			if es.ES == nil {
+				es.NewElasticSearch()
+			}
 		}
 	})
 }
@@ -65,6 +69,5 @@ func getConfigsPath() string {
 	// 使用 filepath 包来处理路径
 	path := strings.Split(dir, "BBingyan")[0]
 	configPath := filepath.Join(path, "BBingyan/configs")
-
 	return configPath
 }

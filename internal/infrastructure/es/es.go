@@ -2,6 +2,7 @@ package es
 
 import (
 	"github.com/FIY-pc/BBingyan/internal/config"
+	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"github.com/elastic/go-elasticsearch/v7"
 )
 
@@ -16,6 +17,11 @@ func NewElasticSearch() {
 	}
 	ES, err = elasticsearch.NewClient(cfg)
 	if err != nil {
-		panic(err)
+		logger.Log.Fatal(nil, err.Error())
+	}
+	_, err = ES.Ping()
+	if err != nil {
+		ES = nil
+		logger.Log.Fatal(nil, err.Error())
 	}
 }

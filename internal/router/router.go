@@ -103,7 +103,7 @@ func commentRouter(e *echo.Echo) {
 
 func searchRouter(e *echo.Echo) {
 	basic := e.Group("/api/search")
-	basic.Use(middleware.BasicAuth)
+	basic.Use(middleware.BasicAuth, middleware.EsAvailableCheck)
 	basic.GET("/post", controller.SearchPost)
 }
 
