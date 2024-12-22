@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/FIY-pc/BBingyan/internal/config"
 	"github.com/FIY-pc/BBingyan/internal/infrastructure/logger"
 	"html/template"
@@ -12,11 +13,8 @@ import (
 )
 
 func GenerateHTMLMsg(email, user, nickname, subject, body string) []byte {
-	msg := []byte("To: " + email + "\r\n" +
-		"From: " + user + "\r\n" + "<" + nickname + ">\r\n" +
-		"Subject: " + subject + "\r\n" +
-		"Content-Type: text/html; charset=\"UTF-8\"\r\n\r\n" +
-		body)
+	msg := []byte(fmt.Sprintf("To: %s\r\nFrom: %s <%s>\r\nSubject: %s\r\nContent-Type: text/html; charset=\"UTF-8\"\r\n\r\n%s",
+		email, user, nickname, subject, body))
 	return msg
 }
 
